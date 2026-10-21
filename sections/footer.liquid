@@ -1,0 +1,31 @@
+
+<footer class="site-footer">
+  <div class="page-width footer-inner">
+    <div>
+      <a class="wordmark" href="{{ routes.root_url }}">
+        {{ shop.name | escape }}
+      </a>
+      <p class="eyebrow muted">Independent commerce. Unfinished ideas.</p>
+    </div>
+
+    <nav class="footer-links" aria-label="Footer navigation">
+      <a href="{{ routes.all_products_collection_url }}">Shop</a>
+      <a href="{{ routes.search_url }}">Search</a>
+      <a href="{{ routes.cart_url }}">Bag</a>
+      {% if shop.policies.privacy_policy %}
+        <a href="{{ shop.policies.privacy_policy.url }}">Privacy</a>
+      {% endif %}
+    </nav>
+
+    <p class="eyebrow muted">
+      &copy; {{ 'now' | date: '%Y' }} {{ shop.name | escape }}
+    </p>
+  </div>
+</footer>
+
+{% schema %}
+{
+  "name": "Footer",
+  "settings": []
+}
+{% endschema %}

@@ -1,0 +1,13 @@
+
+{
+  "sections": {
+    "main": {
+      "type": "main-index",
+      "settings": {
+        "products_to_show": 4
+      }
+    }
+  },
+  "order": ["main"]
+}
+    

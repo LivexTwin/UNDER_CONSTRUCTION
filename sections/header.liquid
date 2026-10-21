@@ -1,0 +1,35 @@
+
+<header class="site-header">
+  <div class="page-width header-inner">
+    <a class="wordmark" href="{{ routes.root_url }}">
+      {{ section.settings.brand_name | escape }}
+    </a>
+
+    <nav class="header-nav" aria-label="Main navigation">
+      <a href="{{ routes.all_products_collection_url }}">Available</a>
+      <a href="{{ pages['considered'].url | default: routes.root_url }}">Considered</a>
+      <a href="{{ pages['archive'].url | default: routes.root_url }}">Archive</a>
+    </nav>
+
+    <div class="header-utility">
+      <a href="{{ routes.search_url }}">Search</a>
+      <a href="{{ routes.cart_url }}" aria-label="Shopping bag, {{ cart.item_count }} items">
+        Bag ({{ cart.item_count }})
+      </a>
+    </div>
+  </div>
+</header>
+
+{% schema %}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "text",
+      "id": "brand_name",
+      "label": "Brand name",
+      "default": "UNDER CONSTRUCTION"
+    }
+  ]
+}
+{% endschema %}

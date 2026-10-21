@@ -1,0 +1,120 @@
+
+<section class="page-width hero">
+  <div>
+    <p class="eyebrow">An independent storefront system / 001</p>
+
+    <h1 class="hero-title">
+      More than<br>
+      what's for sale.
+    </h1>
+
+    <p class="hero-copy">
+      A space for the pieces you make, the ideas behind them,
+      and the things worth keeping.
+    </p>
+
+    <a class="text-link" href="{{ routes.all_products_collection_url }}">
+      Explore available work <span aria-hidden="true">↗</span>
+    </a>
+  </div>
+
+  <div class="hero-index">
+    <p class="eyebrow">The framework</p>
+
+    <p>
+      <span class="mono">01 / CONSIDERED</span><br>
+      Ideas, experiments, and work in progress.
+    </p>
+
+    <p>
+      <span class="mono">02 / AVAILABLE</span><br>
+      Pieces ready to find a new home.
+    </p>
+
+    <p>
+      <span class="mono">03 / ARCHIVE</span><br>
+      Past releases and the history behind them.
+    </p>
+  </div>
+</section>
+
+<section class="section-block">
+  <div class="page-width">
+    <div class="section-heading">
+      <div>
+        <p class="eyebrow">02 / Available</p>
+        <h2 class="section-title">Available work</h2>
+      </div>
+
+      {% if section.settings.featured_collection != blank %}
+        <a class="text-link" href="{{ section.settings.featured_collection.url }}">
+          View collection ↗
+        </a>
+      {% endif %}
+    </div>
+
+    {% if section.settings.featured_collection != blank
+      and section.settings.featured_collection.products.size > 0
+    %}
+      <div class="product-grid">
+        {% for product in section.settings.featured_collection.products limit: section.settings.products_to_show %}
+          <article class="product-card">
+            <a href="{{ product.url }}">
+              <div class="product-card-media">
+                {% if product.featured_image %}
+                  {{
+                    product.featured_image
+                    | image_url: width: 900
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '360, 540, 720, 900',
+                      sizes: '(min-width: 801px) 25vw, 50vw',
+                      alt: product.featured_image.alt
+                  }}
+                {% else %}
+                  <div class="product-placeholder">
+                    Image pending
+                  </div>
+                {% endif %}
+              </div>
+
+              <div class="product-card-info">
+                <h3 class="product-card-title">{{ product.title | escape }}</h3>
+                <span class="product-card-price">
+                  {{ product.price | money }}
+                </span>
+              </div>
+            </a>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p class="eyebrow">No collection selected</p>
+        <p>Choose a collection in the theme editor to feature products here.</p>
+      </div>
+    {% endif %}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main homepage",
+  "settings": [
+    {
+      "type": "collection",
+      "id": "featured_collection",
+      "label": "Featured collection"
+    },
+    {
+      "type": "range",
+      "id": "products_to_show",
+      "label": "Products to show",
+      "min": 2,
+      "max": 8,
+      "step": 1,
+      "default": 4
+    }
+  ]
+}
+{% endschema %}
