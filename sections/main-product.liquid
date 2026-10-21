@@ -1,0 +1,93 @@
+
+<section class="page-width product-page">
+  {% assign current_product = product %}
+
+  <div class="product-layout">
+    <div class="product-gallery">
+      {% if current_product.media.size > 0 %}
+        {% for media in current_product.media %}
+          <div class="product-gallery-item">
+            {% if media.media_type == 'image' %}
+              {{
+                media.preview_image
+                | image_url: width: 1600
+                | image_tag:
+                  loading: 'lazy',
+                  widths: '600, 900, 1200, 1600',
+                  alt: media.alt
+              }}
+            {% else %}
+              {{ media | media_tag }}
+            {% endif %}
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="product-placeholder">
+          No product imagery available
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="product-details">
+      <p class="eyebrow">Available / Product detail</p>
+
+      <h1 class="product-title">{{ current_product.title | escape }}</h1>
+
+      <p class="product-price">{{ current_product.selected_or_first_available_variant.price | money }}</p>
+
+      {% form 'product', current_product, id: 'ProductForm' %}
+        {% unless current_product.has_only_default_variant %}
+          <div class="product-option">
+            <label for="VariantSelect" class="eyebrow">Select option</label>
+            <select id="VariantSelect" name="id">
+              {% for variant in current_product.variants %}
+                <option
+                  value="{{ variant.id }}"
+                  {% if variant == current_product.selected_or_first_available_variant %}selected{% endif %}
+                  {% unless variant.available %}disabled{% endunless %}
+                >
+                  {{ variant.title | escape }}{% unless variant.available %} — Sold out{% endunless %}
+                </option>
+              {% endfor %}
+            </select>
+          </div>
+        {% else %}
+          <input
+            type="hidden"
+            name="id"
+            value="{{ current_product.selected_or_first_available_variant.id }}"
+          >
+        {% endunless %}
+
+        <div class="product-option">
+          <label for="Quantity" class="eyebrow">Quantity</label>
+          <input id="Quantity" type="number" name="quantity" min="1" value="1">
+        </div>
+
+        <button
+          class="product-submit"
+          type="submit"
+          name="add"
+          {% unless current_product.available %}disabled{% endunless %}
+        >
+          {% if current_product.available %}Add to bag{% else %}Sold out{% endif %}
+        </button>
+      {% endform %}
+
+      {% if current_product.description != blank %}
+        <div class="product-description">
+          {{ current_product.description }}
+        </div>
+      {% endif %}
+
+      <p class="eyebrow muted">SKU / {{ current_product.selected_or_first_available_variant.sku | default: 'Not assigned' | escape }}</p>
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Main product",
+  "settings": []
+}
+{% endschema %}
