@@ -1,0 +1,116 @@
+<section class="search-page page-width">
+  <header class="search-header">
+    <p class="search-eyebrow">INDEX / SEARCH</p>
+    <h1 class="search-title">Search the catalog.</h1>
+
+    <form action="{{ routes.search_url }}" method="get" role="search" class="search-form">
+      <label class="visually-hidden" for="SearchInput">Search products and content</label>
+      <input
+        id="SearchInput"
+        class="search-input"
+        type="search"
+        name="q"
+        value="{{ search.terms | escape }}"
+        placeholder="Enter a search term..."
+        autocomplete="off"
+      >
+      <button class="search-submit" type="submit">SEARCH →</button>
+    </form>
+  </header>
+
+  {% if search.performed %}
+    <div class="search-results-header">
+      <p>
+        {% if search.results_count == 0 %}
+          NO RESULTS / {{ search.terms | escape }}
+        {% else %}
+          {{ search.results_count }} RESULTS / {{ search.terms | escape }}
+        {% endif %}
+      </p>
+    </div>
+
+    {% paginate search.results by 12 %}
+      {% if search.results.size > 0 %}
+        <div class="search-results-grid">
+          {% for result in search.results %}
+            <article class="search-result">
+              <a class="search-result-image" href="{{ result.url }}">
+                {% if result.object_type == 'product' and result.featured_image %}
+                  {{
+                    result.featured_image
+                    | image_url: width: 700
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '300, 500, 700',
+                      alt: result.featured_image.alt
+                  }}
+                {% elsif result.object_type == 'article' and result.image %}
+                  {{
+                    result.image
+                    | image_url: width: 700
+                    | image_tag:
+                      loading: 'lazy',
+                      widths: '300, 500, 700',
+                      alt: result.image.alt
+                  }}
+                {% else %}
+                  <div class="search-result-placeholder">
+                    {{ result.object_type | upcase }}
+                  </div>
+                {% endif %}
+              </a>
+
+              <div class="search-result-info">
+                <p class="search-result-type">
+                  {{ result.object_type | upcase }}
+                </p>
+
+                <h2 class="search-result-title">
+                  <a href="{{ result.url }}">{{ result.title | escape }}</a>
+                </h2>
+
+                {% if result.object_type == 'product' %}
+                  <p class="search-result-price">
+                    {% if result.price_varies %}
+                      {{ result.price_min | money }} – {{ result.price_max | money }}
+                    {% else %}
+                      {{ result.price | money }}
+                    {% endif %}
+                  </p>
+                {% elsif result.content != blank %}
+                  <p class="search-result-excerpt">
+                    {{ result.content | strip_html | truncate: 140 | escape }}
+                  </p>
+                {% endif %}
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+
+        {% if paginate.pages > 1 %}
+          <nav class="search-pagination" aria-label="Search result pages">
+            {% if paginate.previous %}
+              <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
+            {% else %}
+              <span>← PREVIOUS</span>
+            {% endif %}
+
+            <span>PAGE {{ paginate.current_page }} / {{ paginate.pages }}</span>
+
+            {% if paginate.next %}
+              <a href="{{ paginate.next.url }}">NEXT →</a>
+            {% else %}
+              <span>NEXT →</span>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% else %}
+        <div class="search-empty">
+          <p>NOTHING FOUND.</p>
+          <p>Try another term or browse the available products.</p>
+          <a href="{{ routes.all_products_collection_url }}">VIEW ALL PRODUCTS →</a>
+        </div>
+      {% endif %}
+    {% endpaginate %}
+  {% endif %}
+</section>
