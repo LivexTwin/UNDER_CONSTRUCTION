@@ -1,13 +1,18 @@
-
 {
   "sections": {
-    "main": {
-      "type": "main-index",
+    "considered": {
+      "type": "main-considered",
+      "settings": {}
+    },
+    "available": {
+      "type": "main-available",
       "settings": {
         "products_to_show": 4
       }
     }
   },
-  "order": ["main"]
+  "order": [
+    "considered",
+    "available"
+  ]
 }
-    

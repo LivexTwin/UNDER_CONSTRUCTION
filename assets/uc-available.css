@@ -1,0 +1,95 @@
+
+.uc-available {
+  padding-block: clamp(5rem, 10vw, 10rem);
+  background: var(--uc-paper);
+  color: var(--uc-ink);
+  border-top: 1px solid var(--uc-line);
+}
+
+.uc-available-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2rem;
+}
+
+.uc-available-heading .uc-eyebrow {
+  margin-bottom: 1.5rem;
+}
+
+.uc-section-title {
+  margin: 0;
+  font-size: clamp(3.5rem, 9vw, 9rem);
+  font-weight: 400;
+  line-height: 0.95;
+  letter-spacing: -0.09em;
+}
+
+.uc-available-heading .uc-text-link {
+  flex-shrink: 0;
+}
+
+.uc-section-intro {
+  max-width: 30rem;
+  margin: 2rem 0 4rem;
+  font-size: 1.05rem;
+  line-height: 1.7;
+  color: #53524d;
+}
+
+.uc-available .product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(1rem, 2.5vw, 2.5rem);
+}
+
+.uc-available .product-card {
+  min-width: 0;
+}
+
+.uc-available .product-card > a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.uc-available .product-card-media {
+  overflow: hidden;
+  background: #e6e3dc;
+}
+
+.uc-available .product-card-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 0.82;
+  object-fit: cover;
+}
+
+.uc-available .product-card-info {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-top: 1rem;
+}
+
+.uc-available .product-card-title {
+  margin: 0;
+  font: 0.75rem/1.5 monospace;
+}
+
+.uc-available .product-card-price {
+  font: 0.7rem/1.5 monospace;
+  white-space: nowrap;
+}
+
+.uc-available .empty-state {
+  padding-block: 3rem;
+  font: 0.75rem/1.8 monospace;
+}
+
+@media (max-width: 600px) {
+  .uc-available-heading .uc-text-link {
+    margin-top: 1.5rem;
+  }
+}

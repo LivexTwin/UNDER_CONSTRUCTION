@@ -1,0 +1,287 @@
+
+<section class="uc-considered" id="considered">
+  <div class="uc-considered-inner">
+
+    <div class="uc-considered-layout">
+
+  
+<div class="uc-considered-visual">
+  <div class="uc-visual-grid">
+
+    <div class="uc-editorial-composition">
+
+      {% if section.settings.considered_image != blank %}
+        <figure class="uc-editorial-image uc-editorial-primary">
+          {{
+            section.settings.considered_image
+            | image_url: width: 1400
+            | image_tag:
+              loading: 'eager',
+              widths: '540, 720, 1000, 1400',
+              sizes: '(min-width: 900px) 25vw, 65vw',
+              alt: section.settings.considered_image.alt
+          }}
+          <span class="uc-image-index">01 / 03</span>
+          <span class="uc-image-caption">NYLON / TECH</span>
+        </figure>
+      {% endif %}
+
+      {% if section.settings.considered_detail_image != blank %}
+        <figure class="uc-editorial-image uc-editorial-left">
+          {{
+            section.settings.considered_detail_image
+            | image_url: width: 900
+            | image_tag:
+              loading: 'lazy',
+              widths: '320, 480, 700, 900',
+              sizes: '(min-width: 900px) 15vw, 38vw',
+              alt: section.settings.considered_detail_image.alt
+          }}
+          <span class="uc-image-index">02 / 03</span>
+          <span class="uc-image-caption">FABRICS</span>
+        </figure>
+      {% endif %}
+
+      {% if section.settings.considered_image_2 != blank %}
+        <figure class="uc-editorial-image uc-editorial-right">
+          {{
+            section.settings.considered_image_2
+            | image_url: width: 1000
+            | image_tag:
+              loading: 'lazy',
+              widths: '320, 480, 720, 1000',
+              sizes: '(min-width: 900px) 16vw, 40vw',
+              alt: section.settings.considered_image_2.alt
+          }}
+          <span class="uc-image-index">03 / 03</span>
+          <span class="uc-image-caption">ARCHITECTURE</span>
+        </figure>
+      {% endif %}
+
+      {% if section.settings.considered_image == blank and section.settings.considered_detail_image == blank and section.settings.considered_image_2 == blank %}
+        <div class="uc-editorial-placeholder">PROJECT IMAGERY</div>
+      {% endif %}
+
+    </div>
+
+    <div class="uc-project-index">
+      <span>{{ section.settings.considered_identifier | escape }}</span>
+      <span>{{ section.settings.considered_media_label | escape }}</span>
+    </div>
+
+  </div>
+</div>
+
+
+      <div class="uc-project-panel">
+        <div class="uc-information">
+
+          <p class="uc-information-eyebrow">FEATURED PROJECT</p>
+
+          <h2 class="uc-project-title">
+            {{ section.settings.considered_identifier | escape }}
+          </h2>
+
+          <p class="uc-description">
+            A study in material performance and modern utility. This project explores the intersection of technical fabric, modular design, and everyday movement.
+          </p>
+
+          {% if section.settings.considered_link != blank %}
+            <a class="uc-information-link" href="{{ section.settings.considered_link }}">
+              <span>{{ section.settings.considered_link_label | default: 'VIEW PROJECT' | escape }}</span>
+              <span class="uc-link-arrow" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M7 17 17 7M7 7h10v10"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="square"
+      stroke-linejoin="miter"/>
+  </svg>
+</span>
+            </a>
+          {% else %}
+            <span class="uc-information-link uc-information-link-static">
+              <span>{{ section.settings.considered_link_label | default: 'VIEW PROJECT' | escape }}</span>
+             <span class="uc-link-arrow" aria-hidden="true">
+  <svg viewBox="0 0 24 24" fill="none">
+    <path d="M7 17 17 7M7 7h10v10"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="square"
+      stroke-linejoin="miter"/>
+  </svg>
+</span>
+            </span>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+
+    <div class="uc-section-transition">
+      <span>01 / 12</span>
+    </div>
+
+  </div>
+</section>
+
+
+<script>
+  (() => {
+    const section = document.querySelector('#considered.uc-considered');
+
+    if (!section || section.dataset.interactionReady === 'true') return;
+    section.dataset.interactionReady = 'true';
+
+    section.querySelectorAll('.uc-editorial-composition').forEach((composition) => {
+      const left = composition.querySelector('.uc-editorial-left');
+      const right = composition.querySelector('.uc-editorial-right');
+
+      if (!left && !right) return;
+
+      const setActive = (image) => {
+        composition.classList.toggle('is-active-left', image === left);
+        composition.classList.toggle('is-active-right', image === right);
+      };
+
+      const reset = () => {
+        composition.classList.remove('is-active-left', 'is-active-right');
+      };
+
+      [left, right].filter(Boolean).forEach((image) => {
+        image.addEventListener('pointerenter', (event) => {
+          if (event.pointerType === 'mouse') setActive(image);
+        });
+
+        image.addEventListener('pointerleave', (event) => {
+          if (event.pointerType === 'mouse') reset();
+        });
+
+        image.addEventListener('focus', () => setActive(image));
+        image.addEventListener('blur', reset);
+      });
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Main considered",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Project images"
+    },
+    {
+      "type": "image_picker",
+      "id": "considered_detail_image",
+      "label": "Detail / material image"
+    },
+    {
+      "type": "image_picker",
+      "id": "considered_image",
+      "label": "Primary garment image",
+      "info": "Main image, shown as the tallest and highest image."
+    },
+    {
+      "type": "image_picker",
+      "id": "considered_image_2",
+      "label": "Process image"
+    },
+    {
+      "type": "image_picker",
+      "id": "considered_image_3",
+      "label": "Reference image",
+      "info": "Retained for future use; not displayed in this three-image composition."
+    },
+    {
+      "type": "header",
+      "content": "Project index"
+    },
+    {
+      "type": "text",
+      "id": "considered_identifier",
+      "label": "Project identifier",
+      "default": "UC-2026-004"
+    },
+    {
+      "type": "text",
+      "id": "considered_media_label",
+      "label": "Material / category",
+      "default": "NYLON / TECH"
+    },
+    {
+      "type": "text",
+      "id": "considered_material_note",
+      "label": "Material note",
+      "default": "RECYCLED"
+    },
+    {
+      "type": "text",
+      "id": "considered_atelier",
+      "label": "Studio / atelier",
+      "default": "ATELIER 04"
+    },
+    {
+      "type": "header",
+      "content": "Project information"
+    },
+    {
+      "type": "text",
+      "id": "considered_title",
+      "label": "Project title",
+      "default": "UC-2026-004"
+    },
+    {
+      "type": "text",
+      "id": "considered_status",
+      "label": "Project status",
+      "default": "UNDER CONSIDERATION"
+    },
+    {
+      "type": "text",
+      "id": "considered_drop",
+      "label": "Estimated drop",
+      "default": "Q3 2026"
+    },
+    {
+      "type": "textarea",
+      "id": "considered_description",
+      "label": "Technical description",
+      "default": "A study in material performance and modern utility. This project explores the intersection of technical fabric, modular design, and everyday movement."
+    },
+    {
+      "type": "header",
+      "content": "Reference notes"
+    },
+    {
+      "type": "textarea",
+      "id": "considered_reference_text",
+      "label": "Reference text",
+      "default": "再生ナイロン\nテクニカルパーカー"
+    },
+    {
+      "type": "text",
+      "id": "considered_reference_id",
+      "label": "Reference identifier",
+      "default": "プロジェクト 04"
+    },
+    {
+      "type": "header",
+      "content": "Project link"
+    },
+    {
+      "type": "url",
+      "id": "considered_link",
+      "label": "Project page link"
+    },
+    {
+      "type": "text",
+      "id": "considered_link_label",
+      "label": "Project link label",
+      "default": "VIEW PROJECT"
+    }
+  ]
+}
+{% endschema %}
