@@ -180,12 +180,13 @@
     </button>
 
     <div class="uc-archive__gallery-content">
-      <img
-        class="uc-archive__gallery-image"
-        data-gallery-image
-        src=""
-        alt=""
-      >
+  <img
+  class="uc-archive__gallery-image"
+  data-gallery-image
+  alt=""
+  width="1200"
+  height="1600"
+>
 
       <p
         class="uc-archive__gallery-caption"
@@ -412,6 +413,11 @@
     outline-offset: 3px;
   }
 
+  .uc-archive__gallery-nav:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
   @media (max-width: 700px) {
     .uc-archive__gallery {
       grid-template-columns: 40px minmax(0, 1fr) 40px;
@@ -467,6 +473,7 @@
     let activeIndex = 0;
     let previousFocus = null;
     let previousBodyOverflow = '';
+    let galleryOpen = false;
 
     const getControls = (gallery) => ({
       image: gallery.querySelector('[data-gallery-image]'),
@@ -476,18 +483,18 @@
       next: gallery.querySelector('[data-gallery-next]')
     });
 
-    const showImage = () => {
-      if (!activeGallery || !activeImages.length) return;
+const showImage = () => {
+  if (!activeGallery || !activeImages.length) return;
 
-      const controls = getControls(activeGallery);
-      controls.image.src = activeImages[activeIndex];
-      controls.caption.textContent =
-        `${activeGallery.dataset.productTitle || ''} — ${activeIndex + 1} / ${activeImages.length}`;
+  const controls = getControls(activeGallery);
+  controls.image.src = activeImages[activeIndex];
+  controls.caption.textContent =
+    `${activeGallery.dataset.productTitle || ''} — ${activeIndex + 1} / ${activeImages.length}`;
 
-      const multipleImages = activeImages.length > 1;
-      controls.previous.hidden = !multipleImages;
-      controls.next.hidden = !multipleImages;
-    };
+  const multipleImages = activeImages.length > 1;
+  controls.previous.disabled = !multipleImages;
+  controls.next.disabled = !multipleImages;
+};
 
     const closeGallery = () => {
       if (!activeGallery) return;
@@ -503,6 +510,8 @@
 
       activeGallery = null;
       activeImages = [];
+      galleryOpen = false;
+      startAnimation();
 
       if (previousFocus && previousFocus.isConnected) {
         previousFocus.focus();
@@ -534,6 +543,7 @@
       activeImages = images;
       activeIndex = 0;
       previousFocus = row;
+      galleryOpen = true;
       previousBodyOverflow = document.body.style.overflow;
 
       gallery.dataset.productTitle =
@@ -640,6 +650,7 @@ let nextPosition = currentPosition;
   reducedMotion.matches ||
   hovering ||
   focused ||
+    galleryOpen ||
   document.hidden ||
   !canScroll()
 ) {
