@@ -21,8 +21,12 @@
               sizes: '(min-width: 900px) 25vw, 65vw',
               alt: section.settings.considered_image.alt
           }}
-          <span class="uc-image-index">01 / 03</span>
-          <span class="uc-image-caption">NYLON / TECH</span>
+     <span class="uc-image-index">
+  {{ section.settings.considered_primary_index | escape }}
+</span>
+<span class="uc-image-caption">
+  {{ section.settings.considered_primary_caption | escape }}
+</span>
         </figure>
       {% endif %}
 
@@ -37,8 +41,12 @@
               sizes: '(min-width: 900px) 15vw, 38vw',
               alt: section.settings.considered_detail_image.alt
           }}
-          <span class="uc-image-index">02 / 03</span>
-          <span class="uc-image-caption">FABRICS</span>
+   <span class="uc-image-index">
+  {{ section.settings.considered_detail_index | escape }}
+</span>
+<span class="uc-image-caption">
+  {{ section.settings.considered_detail_caption | escape }}
+</span>
         </figure>
       {% endif %}
 
@@ -53,8 +61,12 @@
               sizes: '(min-width: 900px) 16vw, 40vw',
               alt: section.settings.considered_image_2.alt
           }}
-          <span class="uc-image-index">03 / 03</span>
-          <span class="uc-image-caption">ARCHITECTURE</span>
+      <span class="uc-image-index">
+  {{ section.settings.considered_process_index | escape }}
+</span>
+<span class="uc-image-caption">
+  {{ section.settings.considered_process_caption | escape }}
+</span>
         </figure>
       {% endif %}
 
@@ -267,6 +279,43 @@
       "label": "Reference identifier",
       "default": "プロジェクト 04"
     },
+
+    {
+  "type": "text",
+  "id": "considered_primary_index",
+  "label": "Primary image index",
+  "default": "01 / 03"
+},
+{
+  "type": "text",
+  "id": "considered_primary_caption",
+  "label": "Primary image caption",
+  "default": "NYLON / TECH"
+},
+{
+  "type": "text",
+  "id": "considered_detail_index",
+  "label": "Detail image index",
+  "default": "02 / 03"
+},
+{
+  "type": "text",
+  "id": "considered_detail_caption",
+  "label": "Detail image caption",
+  "default": "FABRICS"
+},
+{
+  "type": "text",
+  "id": "considered_process_index",
+  "label": "Process image index",
+  "default": "03 / 03"
+},
+{
+  "type": "text",
+  "id": "considered_process_caption",
+  "label": "Process image caption",
+  "default": "ARCHITECTURE"
+},
     {
       "type": "header",
       "content": "Project link"

@@ -1,108 +1,289 @@
 
+<section class="collection-page">
+ 
+<aside class="collection-index" aria-label="Catalog index">
+  <div class="collection-index-heading">
+   <h2>{{ section.settings.index_title | escape }}</h2>
+  </div>
 
-<section class="collection-page page-width">
-  <header class="collection-header">
-    <p class="collection-eyebrow">CATALOG / {{ collection.products_count }} ITEMS</p>
+  {% for filter in collection.filters %}
+    <div class="collection-index-group">
+      <p class="collection-index-label">
+        {% case filter.type %}
+          {% when 'price_range' %}
+            PRICE
+          {% else %}
+            {{ filter.label | escape }}
+        {% endcase %}
+      </p>
 
-    <h1 class="collection-title">{{ collection.title | escape }}</h1>
+      {% if filter.type == 'price_range' %}
+        <form class="collection-price-filter" method="get">
+          {% for active_filter in collection.filters %}
+            {% for value in active_filter.active_values %}
+              <input
+                type="hidden"
+                name="{{ value.param_name | escape }}"
+                value="{{ value.value | escape }}"
+              >
+            {% endfor %}
+          {% endfor %}
 
-    {% if section.settings.show_description and collection.description != blank %}
-      <div class="collection-description">
-        {{ collection.description }}
-      </div>
-    {% endif %}
-  </header>
+          <label for="Filter-{{ filter.param_name }}-GTE">MIN</label>
+          <input
+            id="Filter-{{ filter.param_name }}-GTE"
+            name="{{ filter.min_value.param_name }}"
+            type="number"
+            min="0"
+            placeholder="0"
+            {% if filter.min_value.value %}
+              value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+            {% endif %}
+          >
 
-  {% paginate collection.products by section.settings.products_per_page %}
-    {% if collection.products.size > 0 %}
-      <div class="collection-grid">
-        {% for product in collection.products %}
-          <article class="collection-card">
-            <a class="collection-card-image" href="{{ product.url }}">
-              {% if product.featured_image %}
-                {{
-                  product.featured_image
-                  | image_url: width: 800
-                  | image_tag:
-                    loading: 'lazy',
-                    widths: '300, 500, 700, 800',
-                    alt: product.featured_image.alt
-                }}
-              {% else %}
-                <div class="collection-card-placeholder">
-                  IMAGE NOT AVAILABLE
-                </div>
-              {% endif %}
-            </a>
+          <label for="Filter-{{ filter.param_name }}-LTE">MAX</label>
+          <input
+            id="Filter-{{ filter.param_name }}-LTE"
+            name="{{ filter.max_value.param_name }}"
+            type="number"
+            min="0"
+            placeholder="—"
+            {% if filter.max_value.value %}
+              value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+            {% endif %}
+          >
 
-            <div class="collection-card-info">
-              <h2 class="collection-card-title">
-                <a href="{{ product.url }}">{{ product.title | escape }}</a>
-              </h2>
-
-              <p class="collection-card-price">
-                {% if product.price_varies %}
-                  {{ product.price_min | money }} – {{ product.price_max | money }}
-                {% else %}
-                  {{ product.price | money }}
+          <button type="submit">APPLY</button>
+        </form>
+      {% else %}
+        <ul class="collection-filter-values" role="list">
+          {% for value in filter.values %}
+            <li>
+              <a
+                href="{{ value.url_to_add | default: value.url_to_remove }}"
+                {% if value.active %}aria-current="true"{% endif %}
+              >
+                <span>{{ value.label | escape }}</span>
+                {% if value.active %}
+                  <span aria-hidden="true"> ×</span>
                 {% endif %}
-              </p>
-
-              {% unless product.available %}
-                <p class="collection-card-status">SOLD OUT</p>
-              {% endunless %}
-            </div>
-          </article>
-        {% endfor %}
-      </div>
-
-      {% if paginate.pages > 1 %}
-        <nav class="collection-pagination" aria-label="Pagination">
-          {% if paginate.previous %}
-            <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
-          {% else %}
-            <span class="pagination-disabled">← PREVIOUS</span>
-          {% endif %}
-
-          <span class="pagination-count">
-            PAGE {{ paginate.current_page }} / {{ paginate.pages }}
-          </span>
-
-          {% if paginate.next %}
-            <a href="{{ paginate.next.url }}">NEXT →</a>
-          {% else %}
-            <span class="pagination-disabled">NEXT →</span>
-          {% endif %}
-        </nav>
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
       {% endif %}
+    </div>
+  {% endfor %}
+
+</aside>
+
+
+  <div class="collection-workspace">
+
+    {% if section.settings.hero_image != blank %}
+      <section class="uc-collection-hero" aria-label="Featured content">
+        <a
+          class="uc-collection-hero-media{% if section.settings.hero_crop %} uc-collection-hero-media--crop{% endif %}"
+          {% if section.settings.hero_link != blank %}
+            href="{{ section.settings.hero_link }}"
+          {% endif %}
+        >
+          {{
+            section.settings.hero_image
+            | image_url: width: 2400
+            | image_tag:
+              loading: 'eager',
+              widths: '750, 1100, 1500, 2000, 2400',
+              sizes: '(min-width: 761px) calc(100vw - 300px), 100vw',
+              alt: section.settings.hero_image.alt
+          }}
+        </a>
+
+        {% if section.settings.hero_heading != blank or section.settings.hero_text != blank %}
+          <div class="uc-collection-hero-caption">
+            {% if section.settings.hero_heading != blank %}
+              <h2>{{ section.settings.hero_heading | escape }}</h2>
+            {% endif %}
+
+            {% if section.settings.hero_text != blank %}
+              <p>{{ section.settings.hero_text | escape }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      </section>
+    {% endif %}
+
+    <header class="collection-toolbar">
+      <p class="collection-eyebrow">
+        {{ collection.title | escape }} /
+        {{ collection.products_count }} ITEMS
+      </p>
+
+      <div class="collection-toolbar-controls">
+        <label for="CollectionSort">SORT</label>
+        <select id="CollectionSort" name="sort_by">
+          {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
+          {% for option in collection.sort_options %}
+            <option
+              value="{{ option.value | escape }}"
+              {% if option.value == sort_by %}selected{% endif %}
+            >
+              {{ option.name | escape }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+    </header>
+
+    {% paginate collection.products by section.settings.products_per_page %}
+      {% if collection.products.size > 0 %}
+        <div class="collection-grid">
+          {% for product in collection.products %}
+           <article class="collection-card">
+  <a
+    class="collection-card-image"
+    href="{{ product.url }}"
+    aria-label="{{ product.title | escape }}"
+  >
+    {% if product.featured_image %}
+      {{
+        product.featured_image
+        | image_url: width: 1000
+        | image_tag:
+          loading: 'lazy',
+          widths: '300, 500, 700, 1000',
+          sizes: '(min-width: 1200px) 40vw, (min-width: 761px) 35vw, 50vw',
+          alt: product.featured_image.alt
+      }}
     {% else %}
-      <div class="collection-empty">
-        <p>NOTHING AVAILABLE IN THIS COLLECTION.</p>
-        <a href="{{ routes.all_products_collection_url }}">VIEW ALL PRODUCTS →</a>
+      <div class="collection-card-placeholder">
+        IMAGE NOT AVAILABLE
       </div>
     {% endif %}
-  {% endpaginate %}
+  </a>
+
+  <div class="collection-card-info">
+
+
+    <h2 class="collection-card-title">
+      <a href="{{ product.url }}">
+        {{ product.title | escape }}
+      </a>
+    </h2>
+
+    <p class="collection-card-price">
+      {% if product.price_varies %}
+        {{ product.price_min | money }} – {{ product.price_max | money }}
+      {% else %}
+        {{ product.price | money }}
+      {% endif %}
+    </p>
+  </div>
+</article>
+          {% endfor %}
+        </div>
+
+        {% if paginate.pages > 1 %}
+          <nav class="collection-pagination" aria-label="Pagination">
+            {% if paginate.previous %}
+              <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
+            {% else %}
+              <span class="pagination-disabled">← PREVIOUS</span>
+            {% endif %}
+
+            <span class="pagination-count">
+              PAGE {{ paginate.current_page }} / {{ paginate.pages }}
+            </span>
+
+            {% if paginate.next %}
+              <a href="{{ paginate.next.url }}">NEXT →</a>
+            {% else %}
+              <span class="pagination-disabled">NEXT →</span>
+            {% endif %}
+          </nav>
+        {% endif %}
+      {% else %}
+        <div class="collection-empty">
+          <p>NOTHING AVAILABLE IN THIS COLLECTION.</p>
+          <a href="{{ routes.all_products_collection_url }}">VIEW ALL PRODUCTS →</a>
+        </div>
+      {% endif %}
+    {% endpaginate %}
+  </div>
 </section>
 
-{% schema %}
+<script>
+  (() => {
+    const sortSelect = document.querySelector('#CollectionSort');
+    if (!sortSelect) return;
+
+    sortSelect.addEventListener('change', () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('sort_by', sortSelect.value);
+      url.searchParams.delete('page');
+      window.location.href = url.toString();
+    });
+  })();
+</script>
+
+
+  {% schema %}
+  {
+    "name": "Main collection",
+    "settings": [
+      {
+        "type": "checkbox",
+        "id": "show_description",
+        "label": "Show collection description",
+        "default": true
+      },
+      {
+        "type": "range",
+        "id": "products_per_page",
+        "label": "Products per page",
+        "min": 4,
+        "max": 24,
+        "step": 4,
+        "default": 12
+      },
+      {
+       "type": "text",
+       "id": "index_title",
+       "label": "Index heading",
+       "default": "CATALOG"
+},
 {
-  "name": "Main collection",
-  "settings": [
-    {
-      "type": "checkbox",
-      "id": "show_description",
-      "label": "Show collection description",
-      "default": true
-    },
-    {
-      "type": "range",
-      "id": "products_per_page",
-      "label": "Products per page",
-      "min": 4,
-      "max": 24,
-      "step": 4,
-      "default": 12
-    }
-  ]
+  "type": "header",
+  "content": "Collection hero"
+},
+{
+  "type": "image_picker",
+  "id": "hero_image",
+  "label": "Hero image"
+},
+{
+  "type": "checkbox",
+  "id": "hero_crop",
+  "label": "Crop hero image",
+  "default": false,
+  "info": "Off displays the entire image. On crops to a wide 2:1 frame."
+},
+{
+  "type": "text",
+  "id": "hero_heading",
+  "label": "Hero heading"
+},
+{
+  "type": "text",
+  "id": "hero_text",
+  "label": "Hero text"
+},
+{
+  "type": "url",
+  "id": "hero_link",
+  "label": "Hero link"
 }
-{% endschema %}
+
+    ]
+  }
+  {% endschema %}

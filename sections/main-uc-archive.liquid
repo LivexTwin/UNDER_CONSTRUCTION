@@ -1,0 +1,884 @@
+{% liquid
+  assign archive_collection = collections.all
+%}
+
+<section class="uc-archive" aria-label="Product archive">
+      <div class="uc-archive__controls">
+    <button
+      class="uc-archive__toggle"
+      type="button"
+      data-archive-toggle
+      aria-label="Pause automatic scrolling"
+      aria-pressed="false"
+    >
+      PAUSE
+    </button>
+  </div>
+  <div
+    class="uc-archive__viewport"
+    data-archive-viewport
+    tabindex="0"
+    aria-label="Scrollable product archive"
+  >
+    
+    <div class="uc-archive__list" data-archive-list>
+
+    {% paginate archive_collection.products by 50 %}
+      {% for product in archive_collection.products %}
+        {% assign is_sold_out = true %}
+
+        {% for variant in product.variants %}
+          {% if variant.available %}
+            {% assign is_sold_out = false %}
+            {% break %}
+          {% endif %}
+        {% endfor %}
+
+        {% if is_sold_out %}
+          <button
+            class="uc-archive__row"
+            type="button"
+            data-archive-item
+            data-product-title="{{ product.title | escape }}"
+            data-gallery-images='[
+              {% for image in product.images %}
+                "{{ image | image_url: width: 1600 }}"{% unless forloop.last %},{% endunless %}
+              {% endfor %}
+            ]'
+          >
+            <span class="uc-archive__image">
+              {% if product.featured_image %}
+                {{
+                  product.featured_image
+                  | image_url: width: 240
+                  | image_tag: loading: 'lazy', alt: ''
+                }}
+              {% endif %}
+            </span>
+
+         <span class="uc-archive__name">
+  {{ product.title | escape }}
+</span>
+
+<span class="uc-archive__collection">
+  {{ product.metafields.custom.archive_collection.value | escape }}
+</span>
+
+<span class="uc-archive__release-date">
+  {% if product.published_at != blank %}
+    {{ product.published_at | date: '%d.%m.%y' }}
+  {% endif %}
+</span>
+
+<span class="uc-archive__material">
+  {{ product.metafields.custom.material.value | escape }}
+</span>
+
+<span class="uc-archive__notes">
+  {{ product.metafields.custom.archive_notes.value | escape }}
+</span>
+          </button>
+        {% endif %}
+      {% endfor %}
+    {% endpaginate %}
+
+    {% for block in section.blocks %}
+      {% if block.type == 'archive_item' %}
+
+        {% assign gallery_image_ids = 'image,gallery_image_2,gallery_image_3,gallery_image_4,gallery_image_5' | split: ',' %}
+        {% assign image_count = 0 %}
+
+        {% capture manual_gallery_images %}
+          [
+            {% for image_id in gallery_image_ids %}
+              {% assign gallery_image = block.settings[image_id] %}
+              {% if gallery_image %}
+                {% if image_count > 0 %},{% endif %}
+                "{{ gallery_image | image_url: width: 1600 }}"
+                {% assign image_count = image_count | plus: 1 %}
+              {% endif %}
+            {% endfor %}
+          ]
+        {% endcapture %}
+
+        <button
+          class="uc-archive__row"
+          
+          type="button"
+          data-archive-item
+          data-manual-entry
+          data-gallery-images='{{ manual_gallery_images | strip }}'
+          {{ block.shopify_attributes }}
+        >
+          <span class="uc-archive__image">
+            {% if block.settings.image %}
+              {{
+                block.settings.image
+                | image_url: width: 240
+                | image_tag: loading: 'lazy', alt: ''
+              }}
+            {% endif %}
+          </span>
+
+          <span class="uc-archive__name">
+            {{ block.settings.name | escape }}
+
+            {% if block.settings.size != blank %}
+              <span class="uc-archive__size">
+                {{ block.settings.size | escape }}
+              </span>
+            {% endif %}
+          </span>
+
+          <span class="uc-archive__collection">
+            {{ block.settings.collection | escape }}
+          </span>
+
+          <span class="uc-archive__release-date">
+            {{ block.settings.release_date | escape }}
+          </span>
+
+          <span class="uc-archive__material">
+            {{ block.settings.material | escape }}
+          </span>
+
+          <span class="uc-archive__notes">
+            {{ block.settings.notes | escape }}
+          </span>
+        </button>
+
+      {% endif %}
+    {% endfor %}
+
+  </div>
+ </div>
+  <div
+    class="uc-archive__gallery"
+    data-archive-gallery
+    role="dialog"
+    aria-modal="true"
+    aria-label="Image gallery"
+    aria-hidden="true"
+    hidden
+  >
+    <button
+      class="uc-archive__gallery-close"
+      type="button"
+      data-gallery-close
+      aria-label="Close gallery"
+    >
+      ×
+    </button>
+
+    <button
+      class="uc-archive__gallery-nav uc-archive__gallery-nav--previous"
+      type="button"
+      data-gallery-previous
+      aria-label="Previous image"
+    >
+      ←
+    </button>
+
+    <div class="uc-archive__gallery-content">
+      <img
+        class="uc-archive__gallery-image"
+        data-gallery-image
+        src=""
+        alt=""
+      >
+
+      <p
+        class="uc-archive__gallery-caption"
+        data-gallery-caption
+        aria-live="polite"
+      ></p>
+    </div>
+
+    <button
+      class="uc-archive__gallery-nav uc-archive__gallery-nav--next"
+      type="button"
+      data-gallery-next
+      aria-label="Next image"
+    >
+      →
+    </button>
+  </div>
+</section>
+
+{% stylesheet %}
+  .uc-archive,
+  .uc-archive * {
+    box-sizing: border-box;
+  }
+
+.uc-archive__viewport {
+  height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--uc-muted, #77776e) transparent;
+  overscroll-behavior: contain;
+}
+
+.uc-archive__controls {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 8px;
+}
+
+.uc-archive__toggle {
+  padding: 4px 8px;
+  border: 1px solid var(--uc-archive-rule);
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.uc-archive__viewport {
+  scrollbar-width: none;
+}
+
+.uc-archive__viewport::-webkit-scrollbar {
+  display: none;
+}
+
+.uc-archive__image img {
+  filter: grayscale(100%);
+  transition: filter 250ms ease;
+}
+
+.uc-archive__row:hover .uc-archive__image img,
+.uc-archive__row:focus-visible .uc-archive__image img {
+  filter: grayscale(0%);
+}
+
+.uc-archive__toggle:focus-visible {
+  outline: 2px solid var(--uc-accent, #3455db);
+  outline-offset: 3px;
+}
+
+  .uc-archive {
+    --uc-archive-rule: var(--uc-rule, rgba(179, 218, 23, 0.24));
+
+    width: 100%;
+    max-width: 1200px;
+    margin-inline: auto;
+    color: var(--uc-ink, #252621);
+    font-family: var(--font-mono);
+    font-size: 11px;
+    line-height: 1.5;
+  }
+
+  .uc-archive__list {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+
+.uc-archive__row {
+  display: grid;
+  grid-template-columns:
+    88px
+    minmax(180px, 1.5fr)
+    repeat(4, minmax(110px, 1fr));
+  align-items: start;
+  gap: 16px;
+  width: 100%;
+  padding: 12px 8px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.uc-archive__release-date {
+  font-size: 13px;
+}
+
+  .uc-archive__row:focus-visible {
+    position: relative;
+    outline: 2px solid var(--uc-accent, #db7a34);
+    outline-offset: -2px;
+  }
+
+ .uc-archive__image {
+  display: block;
+  width: 88px;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: var(--uc-paper, #f5f4f0);
+}
+
+.uc-archive__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+  .uc-archive__name {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 3px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    text-transform: uppercase;
+  }
+
+  .uc-archive__size {
+    display: block;
+    color: var(--uc-muted, #77776e);
+  }
+
+.uc-archive__collection,
+.uc-archive__release-date,
+.uc-archive__material,
+.uc-archive__notes {
+  min-width: 0;
+  color: var(--uc-muted, #77776e);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+    .uc-archive__gallery[hidden] {
+    display: none;
+  }
+
+  .uc-archive__gallery {
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    display: grid;
+    grid-template-columns: 64px minmax(0, 1fr) 64px;
+    align-items: center;
+    padding: 48px 24px 24px;
+    background: rgba(0, 0, 0, 0.94);
+    color: #f5f4f0;
+  }
+
+  .uc-archive__gallery-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-width: 0;
+    min-height: 0;
+    height: 100%;
+  }
+
+  .uc-archive__gallery-image {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100vh - 110px);
+    object-fit: contain;
+  }
+
+  .uc-archive__gallery-caption {
+    margin: 12px 0 0;
+    font: inherit;
+    text-align: center;
+  }
+
+  .uc-archive__gallery-close,
+  .uc-archive__gallery-nav {
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+  }
+
+  .uc-archive__gallery-close {
+    position: absolute;
+    top: 16px;
+    right: 24px;
+    font-size: 32px;
+  }
+
+  .uc-archive__gallery-nav {
+    padding: 16px;
+    font-size: 28px;
+  }
+
+  .uc-archive__gallery button:focus-visible {
+    outline: 2px solid var(--uc-accent, #3455db);
+    outline-offset: 3px;
+  }
+
+  @media (max-width: 700px) {
+    .uc-archive__gallery {
+      grid-template-columns: 40px minmax(0, 1fr) 40px;
+      padding: 48px 8px 16px;
+    }
+
+    .uc-archive__gallery-nav {
+      padding: 8px;
+      font-size: 22px;
+    }
+
+    .uc-archive__gallery-close {
+      right: 16px;
+    }
+  }
+
+  @media (max-width: 700px) {
+    .uc-archive__row {
+      grid-template-columns: 60px minmax(0, 1fr) 16px;
+      gap: 12px;
+      padding: 10px 6px;
+    }
+
+    .uc-archive__image {
+      width: 60px;
+    }
+
+    .uc-archive__details {
+      display: none;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .uc-archive,
+    .uc-archive * {
+      scroll-behavior: auto !important;
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+    }
+  }
+
+
+{% endstylesheet %}
+
+
+{% javascript %}
+  (() => {
+    if (window.ucArchiveGalleryInitialized) return;
+    window.ucArchiveGalleryInitialized = true;
+
+    let activeGallery = null;
+    let activeImages = [];
+    let activeIndex = 0;
+    let previousFocus = null;
+    let previousBodyOverflow = '';
+
+    const getControls = (gallery) => ({
+      image: gallery.querySelector('[data-gallery-image]'),
+      caption: gallery.querySelector('[data-gallery-caption]'),
+      close: gallery.querySelector('[data-gallery-close]'),
+      previous: gallery.querySelector('[data-gallery-previous]'),
+      next: gallery.querySelector('[data-gallery-next]')
+    });
+
+    const showImage = () => {
+      if (!activeGallery || !activeImages.length) return;
+
+      const controls = getControls(activeGallery);
+      controls.image.src = activeImages[activeIndex];
+      controls.caption.textContent =
+        `${activeGallery.dataset.productTitle || ''} — ${activeIndex + 1} / ${activeImages.length}`;
+
+      const multipleImages = activeImages.length > 1;
+      controls.previous.hidden = !multipleImages;
+      controls.next.hidden = !multipleImages;
+    };
+
+    const closeGallery = () => {
+      if (!activeGallery) return;
+
+      const gallery = activeGallery;
+      const controls = getControls(gallery);
+
+      gallery.hidden = true;
+      gallery.setAttribute('aria-hidden', 'true');
+      controls.image.removeAttribute('src');
+
+      document.body.style.overflow = previousBodyOverflow;
+
+      activeGallery = null;
+      activeImages = [];
+
+      if (previousFocus && previousFocus.isConnected) {
+        previousFocus.focus();
+      }
+
+      previousFocus = null;
+    };
+
+    const openGallery = (row) => {
+      const archive = row.closest('.uc-archive');
+      if (!archive) return;
+
+      const gallery = archive.querySelector('[data-archive-gallery]');
+      if (!gallery) return;
+
+      let images = [];
+
+      try {
+        images = JSON.parse(row.getAttribute('data-gallery-images') || '[]');
+      } catch (error) {
+        console.error('Could not read archive gallery images:', error);
+      }
+
+      if (!images.length) return;
+
+      if (activeGallery) closeGallery();
+
+      activeGallery = gallery;
+      activeImages = images;
+      activeIndex = 0;
+      previousFocus = row;
+      previousBodyOverflow = document.body.style.overflow;
+
+      gallery.dataset.productTitle =
+        row.dataset.productTitle ||
+        row.querySelector('.uc-archive__name')?.textContent.trim() ||
+        '';
+
+      gallery.hidden = false;
+      gallery.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+
+      showImage();
+      getControls(gallery).close.focus();
+    };
+
+    // Archive automatic scrolling
+    const setupArchiveScrolling = () => {
+      const archives = document.querySelectorAll('.uc-archive');
+
+      archives.forEach((archive) => {
+        if (archive.dataset.scrollInitialized) return;
+        archive.dataset.scrollInitialized = 'true';
+
+        const viewport = archive.querySelector('[data-archive-viewport]');
+        const toggle = archive.querySelector('[data-archive-toggle]');
+
+        if (!viewport || !toggle) return;
+
+        const reducedMotion = window.matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        );
+
+    const desktop = window.matchMedia('(min-width: 1024px)');
+    
+        let direction = 1;
+        let playing = false;
+        let hovering = false;
+        let focused = false;
+        let frame = null;
+        let previousTime = 0;
+        let currentPosition = 0;
+
+        const speed = 25;
+
+        const canScroll = () =>
+          viewport.scrollHeight > viewport.clientHeight + 1;
+
+        const updateButton = () => {
+          toggle.textContent = playing ? 'PAUSE' : 'PLAY';
+          toggle.setAttribute(
+            'aria-label',
+            playing
+              ? 'Pause automatic scrolling'
+              : 'Play automatic scrolling'
+          );
+          toggle.setAttribute('aria-pressed', String(!playing));
+        };
+
+        const stopAnimation = () => {
+          if (frame !== null) {
+            cancelAnimationFrame(frame);
+            frame = null;
+          }
+
+          previousTime = 0;
+        };
+
+        const animate = (time) => {
+          if (!playing) return;
+
+          if (!previousTime) previousTime = time;
+
+          const elapsed = Math.min((time - previousTime) / 1000, 0.05);
+          previousTime = time;
+
+          const maxScroll = viewport.scrollHeight - viewport.clientHeight;
+
+          if (maxScroll <= 0) {
+            stopAnimation();
+            return;
+          }
+
+        currentPosition += direction * speed * elapsed;
+
+let nextPosition = currentPosition;
+
+          if (nextPosition >= maxScroll) {
+            nextPosition = maxScroll;
+            direction = -1;
+          } else if (nextPosition <= 0) {
+            nextPosition = 0;
+            direction = 1;
+          }
+
+          viewport.scrollTop = nextPosition;
+          frame = requestAnimationFrame(animate);
+          currentPosition = nextPosition;
+        };
+
+        const startAnimation = () => {
+        if (
+  !playing ||
+  !desktop.matches ||
+  reducedMotion.matches ||
+  hovering ||
+  focused ||
+  document.hidden ||
+  !canScroll()
+) {
+
+  return;
+}
+
+          if (frame === null) {
+            previousTime = 0;
+            currentPosition = viewport.scrollTop;
+            frame = requestAnimationFrame(animate);
+          }
+        };
+
+        const pauseAnimation = () => {
+          stopAnimation();
+        };
+
+        const setPlaying = (value) => {
+          playing = value;
+          updateButton();
+
+          if (playing) {
+            startAnimation();
+          } else {
+            pauseAnimation();
+          }
+        };
+
+        toggle.addEventListener('click', () => {
+          setPlaying(!playing);
+        });
+
+     viewport.addEventListener('pointerover', (event) => {
+  if (event.target.closest('[data-archive-item]')) {
+    hovering = true;
+    pauseAnimation();
+  }
+});
+
+viewport.addEventListener('pointerout', (event) => {
+  if (
+    event.target.closest('[data-archive-item]') &&
+    !event.relatedTarget?.closest('[data-archive-item]')
+  ) {
+    hovering = false;
+    startAnimation();
+  }
+});
+
+        viewport.addEventListener('focusin', () => {
+          focused = true;
+          pauseAnimation();
+        });
+
+        viewport.addEventListener('focusout', (event) => {
+          if (!viewport.contains(event.relatedTarget)) {
+            focused = false;
+            startAnimation();
+          }
+        });
+
+        desktop.addEventListener('change', () => {
+          if (!desktop.matches) {
+            setPlaying(false);
+          } else if (!reducedMotion.matches && canScroll()) {
+            setPlaying(true);
+          }
+        });
+
+        reducedMotion.addEventListener('change', () => {
+          if (reducedMotion.matches) {
+            setPlaying(false);
+          }
+        });
+
+        document.addEventListener('visibilitychange', () => {
+          if (document.hidden) {
+            pauseAnimation();
+          } else {
+            startAnimation();
+          }
+        });
+
+        updateButton();
+
+        if (desktop.matches && !reducedMotion.matches && canScroll()) {
+          setPlaying(true);
+        } else {
+          setPlaying(false);
+        }
+      });
+    };
+
+    setupArchiveScrolling();
+
+    document.addEventListener('click', (event) => {
+      const row = event.target.closest('[data-archive-item]');
+
+      if (row) {
+        openGallery(row);
+        return;
+      }
+
+      if (!activeGallery) return;
+
+      const controls = getControls(activeGallery);
+
+      if (event.target.closest('[data-gallery-close]')) {
+        closeGallery();
+      } else if (event.target.closest('[data-gallery-previous]')) {
+        activeIndex =
+          (activeIndex - 1 + activeImages.length) % activeImages.length;
+        showImage();
+      } else if (event.target.closest('[data-gallery-next]')) {
+        activeIndex = (activeIndex + 1) % activeImages.length;
+        showImage();
+      } else if (event.target === activeGallery) {
+        closeGallery();
+      }
+    });
+
+    document.addEventListener('keydown', (event) => {
+      if (!activeGallery) return;
+
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        closeGallery();
+        return;
+      }
+
+      if (activeImages.length > 1 && event.key === 'ArrowLeft') {
+        event.preventDefault();
+        activeIndex =
+          (activeIndex - 1 + activeImages.length) % activeImages.length;
+        showImage();
+      }
+
+      if (activeImages.length > 1 && event.key === 'ArrowRight') {
+        event.preventDefault();
+        activeIndex = (activeIndex + 1) % activeImages.length;
+        showImage();
+      }
+
+      if (event.key === 'Tab') {
+        const focusable = Array.from(
+          activeGallery.querySelectorAll(
+            'button:not([hidden]):not(:disabled)'
+          )
+        );
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+
+        if (event.shiftKey && document.activeElement === first) {
+          event.preventDefault();
+          last.focus();
+        } else if (!event.shiftKey && document.activeElement === last) {
+          event.preventDefault();
+          first.focus();
+        }
+      }
+    });
+  })();
+{% endjavascript %}
+
+
+{% schema %}
+{
+  "name": "UC Archive",
+  "settings": [],
+  "blocks": [
+    {
+      "type": "archive_item",
+      "name": "Manual archive item",
+      "settings": [
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Main image"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_image_2",
+          "label": "Additional image 2"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_image_3",
+          "label": "Additional image 3"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_image_4",
+          "label": "Additional image 4"
+        },
+        {
+          "type": "image_picker",
+          "id": "gallery_image_5",
+          "label": "Additional image 5"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Garment name",
+          "default": "UNTITLED OBJECT"
+        },
+        {
+          "type": "text",
+          "id": "size",
+          "label": "Size"
+        },
+        {
+          "type": "text",
+          "id": "collection",
+          "label": "Collection"
+        },
+        {
+          "type": "text",
+          "id": "release_date",
+          "label": "Release date"
+        },
+        {
+          "type": "text",
+          "id": "material",
+          "label": "Material"
+        },
+        {
+          "type": "text",
+          "id": "notes",
+          "label": "Additional notes"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "UC Archive"
+    }
+  ]
+}
+{% endschema %}

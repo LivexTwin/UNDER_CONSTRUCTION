@@ -1,0 +1,788 @@
+
+<section class="uc-home" aria-label="{{ section.settings.accessible_label | escape }}">
+  <h1 class="uc-visually-hidden">{{ section.settings.accessible_title | escape }}</h1>
+
+  <div class="uc-home__hero">
+    {% if section.settings.image != blank %}
+      {{
+        section.settings.image
+        | image_url: width: 2400
+        | image_tag:
+          widths: '600, 900, 1200, 1600, 2000, 2400',
+          sizes: '100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          alt: section.settings.image_alt
+      }}
+    {% else %}
+      <div class="uc-home__placeholder">
+        <span>CAMPAIGN IMAGE / NOT YET SELECTED</span>
+      </div>
+    {% endif %}
+  </div>
+
+   <div class="uc-home__panel uc-home__feature">
+    <p class="uc-home__eyebrow">
+      {{ section.settings.feature_label | escape }}
+    </p>
+<div class="uc-home__feature-entry">
+  <div class="uc-home__feature-media">
+    {% if section.settings.feature_image != blank %}
+      <div class="uc-home__feature-image">
+        {{
+          section.settings.feature_image
+          | image_url: width: 400
+          | image_tag:
+            widths: '120, 200, 300, 400',
+            sizes: '104px',
+            loading: 'lazy',
+            alt: section.settings.feature_image_alt
+        }}
+      </div>
+    {% endif %}
+
+    {% if section.settings.feature_link != blank %}
+      <a class="uc-home__link" href="{{ section.settings.feature_link }}">
+        {{ section.settings.feature_link_label | escape }} →
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="uc-home__feature-copy">
+    {% if section.settings.feature_title != blank %}
+      <p class="uc-home__feature-title">
+        {{ section.settings.feature_title | escape }}
+      </p>
+    {% endif %}
+
+    {% if section.settings.feature_description != blank %}
+      <div class="uc-home__description">
+        {{ section.settings.feature_description }}
+      </div>
+    {% endif %}
+  </div>
+</div>
+  </div>
+
+<div class="uc-home__panel uc-home__releases">
+  <h2 class="uc-home__eyebrow">
+    {{ section.settings.release_index_title | escape }}
+  </h2>
+
+<div
+  class="uc-home__release-list"
+  role="region"
+  aria-label="Release entries"
+  tabindex="0"
+>
+  <table class="uc-home__release-table">
+    <caption class="uc-visually-hidden">
+      {{ section.settings.release_index_title | escape }}
+    </caption>
+
+    <thead class="uc-visually-hidden">
+      <tr>
+        <th scope="col">Release number and product name</th>
+        <th scope="col">Release date</th>
+        <th scope="col">Purchase status and release link</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {% assign release_number = 0 %}
+
+      {% for block in section.blocks %}
+        {% if block.type == 'release' %}
+          {% assign release_number = release_number | plus: 1 %}
+
+          <tr class="uc-home__release-row" {{ block.shopify_attributes }}>
+            <td class="uc-home__release-product">
+              <span class="uc-home__release-number" aria-hidden="true">
+                {{ release_number | prepend: '00' | slice: -2, 2 }}
+              </span>
+
+              {% if block.settings.link != blank %}
+                <a class="uc-home__release-name" href="{{ block.settings.link }}">
+                  {{ block.settings.name | escape }}
+                </a>
+              {% else %}
+                <span class="uc-home__release-name">
+                  {{ block.settings.name | escape }}
+                </span>
+              {% endif %}
+            </td>
+
+            <td class="uc-home__release-date">
+              {{ block.settings.date | escape }}
+            </td>
+
+            <td class="uc-home__release-status">
+              {% if block.settings.link != blank %}
+                <a
+                  class="uc-home__release-action"
+                  href="{{ block.settings.link }}"
+                  aria-label="View release: {{ block.settings.name | escape }}"
+                >
+                  {{ block.settings.status | escape }}
+                  <span aria-hidden="true">↗</span>
+                </a>
+              {% else %}
+                {{ block.settings.status | escape }}
+              {% endif %}
+            </td>
+          </tr>
+        {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<a
+  class="uc-home__release-footer"
+  href="{{ section.settings.release_footer_link | default: routes.all_products_collection_url }}"
+>
+  <span>{{ section.settings.release_footer_label | escape }}</span>
+  <span aria-hidden="true">↗</span>
+</a>
+</div>
+</section>
+
+{% stylesheet %}
+.uc-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+.uc-home,
+.uc-home * {
+  box-sizing: border-box;
+}
+
+.uc-home {
+  --uc-home-rule: var(--uc-rule, rgba(37, 38, 33, 0.24));
+  --uc-home-meta-bg: #eae8e1;
+  --uc-home-number: #a5a49d;
+
+  width: 100%;
+  max-width: 1200px;
+  min-width: 0;
+  margin-inline: auto;
+  color: var(--uc-ink, #252621);
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr);
+
+  height: calc(100svh - var(--uc-header-height, 100px) - 32px);
+  min-height: 480px;
+  border: 1px solid var(--uc-home-rule);
+}
+
+/* Hero */
+.uc-home__hero {
+  grid-column: 1 / -1;
+  grid-row: 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border-bottom: 1px solid var(--uc-home-rule);
+}
+
+.uc-home__hero img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.uc-home__placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: var(--uc-paper, #f5f4f0);
+  font: 11px/1.5 "Courier New", monospace;
+}
+
+/* Lower panels */
+.uc-home__panel {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.uc-home__panel {
+  scrollbar-width: none;
+}
+
+.uc-home__panel::-webkit-scrollbar {
+  display: none;
+}
+
+.uc-home__feature {
+  grid-column: 1;
+  grid-row: 2;
+  padding: 18px;
+  border-right: 1px solid var(--uc-home-rule);
+}
+
+
+
+/* Featured project */
+.uc-home__feature-entry {
+  display: grid;
+  grid-template-columns: 104px minmax(0, 1fr);
+  align-items: start;
+  gap: 16px;
+}
+
+.uc-home__feature-image {
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+.uc-home__feature-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.uc-home__feature-copy {
+  min-width: 0;
+}
+
+.uc-home__eyebrow,
+.uc-home__feature-title,
+.uc-home__description {
+  margin: 0 0 8px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.uc-home__eyebrow,
+.uc-home__description {
+  color: var(--uc-muted, #77776e);
+}
+
+.uc-home__eyebrow,
+.uc-home__feature-title {
+  text-transform: uppercase;
+}
+
+.uc-home__feature-copy .uc-home__feature-title {
+  margin-bottom: 8px;
+}
+
+.uc-home__feature-copy .uc-home__description {
+  margin-bottom: 8px;
+  overflow-wrap: anywhere;
+}
+
+.uc-home__link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--uc-accent, #3455db);
+  font: 11px/1.5 "Courier New", monospace;
+  text-decoration: none;
+}
+
+.uc-home__link:hover {
+  text-decoration: underline;
+}
+
+.uc-home-feature__description {
+  font: inherit;
+  color: inherit;
+  line-height: inherit;
+}
+
+/* Featured project rich text */
+.uc-home__description {
+  min-width: 0;
+  color: var(--uc-muted, #77776e);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-transform: none;
+}
+
+.uc-home__description p {
+  margin: 0 0 0.75em;
+  font: inherit;
+}
+
+.uc-home__description p:last-child {
+  margin-bottom: 0;
+}
+
+.uc-home__description strong {
+  color: var(--uc-ink, #252621);
+  font-weight: 700;
+}
+
+.uc-home__description em {
+  font-style: italic;
+}
+.uc-home__description ul,
+.uc-home__description ol {
+  margin: 0.75em 0;
+  padding-left: 0;
+}
+
+.uc-home__description ul {
+  list-style: none;
+}
+
+.uc-home__description ol {
+  list-style: decimal inside;
+}
+
+.uc-home__description li {
+  margin-bottom: 0.35em;
+  padding-left: 0;
+  font: inherit;
+}
+
+.uc-home__description li::marker {
+  color: var(--uc-accent, #3455db);
+}
+
+/* Release list: independently scrollable, scrollbar hidden */
+.uc-home__releases {
+  grid-column: 2;
+  grid-row: 2;
+
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+
+  /* No right padding: the table reaches the panel edge. */
+  padding: 0 8px 0 8px;
+}
+
+
+.uc-home__release-list {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.uc-home__release-list::-webkit-scrollbar {
+  display: none;
+}
+
+.uc-home__release-list:focus-visible {
+  outline: 2px solid var(--uc-accent, #3455db);
+  outline-offset: -2px;
+}
+
+/* Release table */
+.uc-home__release-table {
+  width: 100%;
+  table-layout: auto;
+  border-collapse: collapse;
+  border-spacing: 0;
+  border: 1px solid var(--uc-home-rule);
+}
+
+.uc-home__release-table th:first-child,
+.uc-home__release-table td:first-child {
+  width: auto;
+}
+
+.uc-home__release-table th:nth-child(2),
+.uc-home__release-table td:nth-child(2),
+.uc-home__release-table th:nth-child(3),
+.uc-home__release-table td:nth-child(3) {
+  width: 1%;
+  white-space: nowrap;
+}
+
+/* Accessible column headings are visually hidden. */
+.uc-home__release-table th {
+  text-align: left;
+}
+
+/* Metadata columns: gray background and vertical separators. */
+.uc-home__release-table th:nth-child(2),
+.uc-home__release-table th:nth-child(3),
+.uc-home__release-row td:nth-child(2),
+.uc-home__release-row td:nth-child(3) {
+  background: var(--uc-home-meta-bg);
+  border-left: 1px solid var(--uc-home-rule);
+}
+
+/* Release row dividers */
+.uc-home__release-row:not(:first-child) {
+    border-top: 1px solid var(--uc-home-rule);
+  border-left: 1px solid var(--uc-home-rule);
+}
+
+.uc-home__release-row:last-child {
+  border-bottom: 1px solid var(--uc-home-rule);
+}
+
+.uc-home__release-row td {
+  padding: 9px 8px;
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.5;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+/* Automatic sequence number */
+.uc-home__release-number {
+  display: inline-block;
+  margin-right: 7px;
+  color: var(--uc-home-number);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Accent-colored release information */
+.uc-home__release-name,
+.uc-home__release-date,
+.uc-home__release-status,
+.uc-home__release-action {
+  color: var(--uc-accent, #3455db);
+}
+
+.uc-home__release-name,
+.uc-home__release-action {
+  text-decoration: none;
+}
+
+.uc-home__release-name {
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.uc-home__release-date,
+.uc-home__release-status {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: normal;
+}
+
+.uc-home__release-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.uc-home__release-name:hover,
+.uc-home__release-action:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Fixed footer remains outside the scrolling table. */
+.uc-home__release-footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin-top: 8px;
+  padding: 12px 8px 8px 0;
+  border-top: 1px solid var(--uc-home-rule);
+
+  color: var(--uc-accent, #3455db);
+  font: 11px/1.5 "Courier New", monospace;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.uc-home__release-footer:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* Keyboard focus */
+.uc-home__release-name:focus-visible,
+.uc-home__release-action:focus-visible,
+.uc-home__release-footer:focus-visible,
+.uc-home__link:focus-visible {
+  outline: 2px solid var(--uc-accent, #3455db);
+  outline-offset: 3px;
+}
+
+/* Short desktop screens */
+@media (max-height: 700px) and (min-width: 701px) {
+  .uc-home {
+    height: calc(100svh - var(--uc-header-height, 100px) - 20px);
+    min-height: 400px;
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .uc-home__release-row td {
+    padding-block: 8px;
+  }
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .uc-home {
+    height: auto;
+    min-height: 0;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto auto;
+  }
+
+  .uc-home__hero {
+    grid-column: 1;
+    grid-row: 1;
+    aspect-ratio: 2 / 1;
+  }
+
+  .uc-home__feature {
+    grid-column: 1;
+    grid-row: 2;
+    padding: 14px;
+    border-right: 0;
+    border-bottom: 1px solid var(--uc-home-rule);
+  }
+
+  .uc-home__releases {
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 240px;
+    padding: 0 0 0 8px;
+  }
+
+  .uc-home__feature-entry {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 12px;
+  }
+
+  .uc-home__release-list {
+    max-height: 280px;
+  }
+
+  .uc-home__release-row td {
+    padding: 12px 5px;
+    font-size: 10px;
+  }
+
+  .uc-home__release-number {
+    margin-right: 3px;
+  }
+
+  .uc-home__release-footer {
+    padding-block: 10px 8px;
+  }
+}
+/* Removed extra closing brace */
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "UNDER CONSTRUCTION home",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Homepage content"
+    },
+    {
+      "type": "text",
+      "id": "accessible_label",
+      "label": "Accessible section description",
+      "default": "Featured project and release index"
+    },
+
+    {
+      "type": "header",
+      "content": "Hero section"
+    },
+    {
+      "type": "text",
+      "id": "accessible_title",
+      "label": "Accessible page heading",
+      "default": "Independent fashion and garment archive"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Campaign image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Campaign image description",
+      "default": "Campaign photography for the fashion label"
+    },
+
+    {
+      "type": "header",
+      "content": "Featured project"
+    },
+    {
+      "type": "text",
+      "id": "feature_accessible_title",
+      "label": "Featured panel accessible heading",
+      "default": "Featured project"
+    },
+    {
+      "type": "image_picker",
+      "id": "feature_image",
+      "label": "Featured project image"
+    },
+    {
+      "type": "text",
+      "id": "feature_image_alt",
+      "label": "Featured image description",
+      "default": "Image from the featured fashion project"
+    },
+    {
+      "type": "text",
+      "id": "feature_label",
+      "label": "Small label",
+      "default": "FEATURED PROJECT"
+    },
+    {
+      "type": "text",
+      "id": "feature_title",
+      "label": "Project name",
+      "default": "CURRENT STUDY / 001"
+    },
+{
+  "type": "richtext",
+  "id": "feature_description",
+  "label": "Project description",
+  "default": "<p>Garment studies, material experiments, and work in progress.</p>"
+},
+    {
+      "type": "url",
+      "id": "feature_link",
+      "label": "Project link"
+    },
+    {
+      "type": "text",
+      "id": "feature_link_label",
+      "label": "Project link text",
+      "default": "VIEW PROJECT"
+    },
+
+    {
+      "type": "header",
+      "content": "Release table"
+    },
+    {
+      "type": "text",
+      "id": "index_accessible_title",
+      "label": "Release index accessible heading",
+      "default": "Release index"
+    },
+    {
+      "type": "text",
+      "id": "release_footer_label",
+      "label": "Release index footer text",
+      "default": "VIEW ALL RELEASES"
+    },
+    {
+      "type": "url",
+      "id": "release_footer_link",
+      "label": "Release index footer destination"
+    },
+
+    {
+      "type": "header",
+      "content": "Advanced"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "release",
+      "name": "Release entry",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Name",
+          "default": "CHAPTER ONE"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Release date",
+          "default": "06.06.26"
+        },
+        {
+          "type": "select",
+          "id": "status",
+          "label": "Purchase status",
+          "options": [
+            {
+              "value": "AVAILABLE",
+              "label": "Available"
+            },
+            {
+              "value": "SOLD OUT",
+              "label": "Sold out"
+            }
+          ],
+          "default": "AVAILABLE"
+        },
+        {
+          "type": "url",
+          "id": "link",
+          "label": "Destination"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "UNDER CONSTRUCTION home",
+      "blocks": [
+        {
+          "type": "release",
+          "settings": {
+            "name": "CHAPTER ONE",
+            "date": "06.06.26",
+            "status": "AVAILABLE"
+          }
+        },
+        {
+          "type": "release",
+          "settings": {
+            "name": "CONSIDERED STUDY",
+            "date": "IN PROGRESS",
+            "status": "SOLD OUT"
+          }
+        },
+        {
+          "type": "release",
+          "settings": {
+            "name": "PAST RELEASE",
+            "date": "ARCHIVE",
+            "status": "SOLD OUT"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

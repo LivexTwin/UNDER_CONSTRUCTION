@@ -1,0 +1,476 @@
+
+<section
+  class="uc-home-index"
+  aria-label="{{ section.settings.accessible_label | escape }}"
+>
+  <div class="uc-home-index__panel uc-home-index__feature">
+    <h2 class="uc-visually-hidden">
+      {{ section.settings.feature_accessible_title | escape }}
+    </h2>
+
+    {% if section.settings.feature_image != blank %}
+      <div class="uc-home-index__feature-image">
+        {{
+          section.settings.feature_image
+          | image_url: width: 1200
+          | image_tag:
+            widths: '400, 600, 800, 1200',
+            sizes: '(min-width: 1200px) 600px, 50vw',
+            loading: 'lazy',
+            alt: section.settings.feature_image_alt
+        }}
+      </div>
+    {% endif %}
+
+    {% if section.settings.feature_label != blank %}
+      <p class="uc-home-index__eyebrow">
+        {{ section.settings.feature_label | escape }}
+      </p>
+    {% endif %}
+
+    {% if section.settings.feature_title != blank %}
+      <p class="uc-home-index__feature-title">
+        {{ section.settings.feature_title | escape }}
+      </p>
+    {% endif %}
+
+    {% if section.settings.feature_description != blank %}
+      <p class="uc-home-index__description">
+        {{ section.settings.feature_description | escape }}
+      </p>
+    {% endif %}
+
+    {% if section.settings.feature_link != blank %}
+      <a
+        class="uc-home-index__link"
+        href="{{ section.settings.feature_link }}"
+      >
+        {{ section.settings.feature_link_label | escape }} →
+      </a>
+    {% endif %}
+  </div>
+
+  <div class="uc-home-index__panel uc-home-index__releases">
+    <h2 class="uc-visually-hidden">
+      {{ section.settings.index_accessible_title | escape }}
+    </h2>
+
+   <div class="uc-home-index__release-list">
+  {% for block in section.blocks %}
+    {% liquid
+      assign release_url = blank
+
+      if block.settings.status == 'SOLD OUT'
+        assign release_url = '/pages/sold'
+      elsif block.settings.status == 'AVAILABLE' and block.settings.product != blank
+        assign release_url = block.settings.product.url
+      endif
+    %}
+
+    <div
+      class="uc-home-index__release"
+      {{ block.shopify_attributes }}
+    >
+      {% if release_url != blank %}
+        <a
+          class="uc-home-index__release-link"
+          href="{{ release_url }}"
+          aria-label="{{ block.settings.number | escape }}. {{ block.settings.name | escape }}, {{ block.settings.date | escape }}, {{ block.settings.status | escape }}"
+        >
+      {% else %}
+        <div class="uc-home-index__release-link">
+      {% endif %}
+
+        <span class="uc-home-index__release-number">
+          {{ block.settings.number | escape }}
+        </span>
+
+        <span class="uc-home-index__release-name">
+          {{ block.settings.name | escape }}
+        </span>
+
+        <span class="uc-home-index__release-date">
+          {{ block.settings.date | escape }}
+        </span>
+
+        <span class="uc-home-index__release-status">
+          {{ block.settings.status | escape }}
+        </span>
+
+      {% if release_url != blank %}
+        </a>
+      {% else %}
+        </div>
+      {% endif %}
+    </div>
+  {% endfor %}
+</div>
+  </div>
+</section>
+
+{% stylesheet %}
+.uc-home-index,
+.uc-home-index * {
+  box-sizing: border-box;
+}
+
+.uc-home-index {
+  width: 100%;
+  max-width: 1200px;
+  min-width: 0;
+  margin-inline: auto;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  border-right: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+  border-bottom: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+  border-left: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+  color: var(--uc-ink, #252621);
+}
+
+.uc-home-index__panel {
+  min-width: 0;
+  padding: 18px;
+}
+
+.uc-home-index__feature {
+  border-right: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+}
+
+.uc-home-index__feature-image {
+  width: 100%;
+  margin-bottom: 14px;
+  overflow: hidden;
+}
+
+.uc-home-index__feature-image img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+}
+
+.uc-home-index__eyebrow,
+.uc-home-index__feature-title,
+.uc-home-index__description {
+  margin: 0 0 8px;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  font-weight: 400;
+}
+
+.uc-home-index__eyebrow {
+  color: var(--uc-muted, #77776e);
+  text-transform: uppercase;
+}
+
+.uc-home-index__feature-title {
+  text-transform: uppercase;
+}
+
+.uc-home-index__description {
+  color: var(--uc-muted, #77776e);
+}
+
+.uc-home-index__link {
+  display: inline-block;
+  margin-top: 8px;
+  color: var(--uc-accent, #3455db);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  text-decoration: none;
+}
+
+.uc-home-index__link:hover {
+  text-decoration: underline;
+}
+
+.uc-home-index__release {
+  border-bottom: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+}
+
+.uc-home-index__release:last-child {
+  border-bottom: 0;
+}
+
+.uc-home-index__release-link {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto;
+  gap: 5px 10px;
+  align-items: baseline;
+  padding: 12px 0;
+  color: inherit;
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.5;
+  text-decoration: none;
+}
+
+a.uc-home-index__release-link:hover .uc-home-index__release-name {
+  color: var(--uc-accent, #3455db);
+}
+
+.uc-home-index__release-number,
+.uc-home-index__release-date,
+.uc-home-index__release-status {
+  color: var(--uc-muted, #77776e);
+}
+
+.uc-home-index__release-number {
+  grid-row: 1 / span 2;
+}
+
+.uc-home-index__release-name {
+  overflow-wrap: anywhere;
+  text-transform: uppercase;
+}
+
+.uc-home-index__release-date {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.uc-home-index__release-status {
+  grid-column: 2 / 4;
+  text-transform: uppercase;
+}
+
+.uc-home-index__release-link:focus-visible,
+.uc-home-index__link:focus-visible {
+  outline: 2px solid var(--uc-accent, #3455db);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .uc-home-index {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .uc-home-index__feature {
+    border-right: 0;
+    border-bottom: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+  }
+
+  .uc-home-index__panel {
+    padding: 14px;
+  }
+
+  .uc-home-index__release-link {
+    grid-template-columns: 24px minmax(0, 1fr);
+  }
+
+  .uc-home-index__release-date {
+    grid-column: 2;
+    text-align: left;
+  }
+
+  .uc-home-index__release-status {
+    grid-column: 2;
+  }
+}
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Homepage index",
+  "settings": [
+    {
+  "type": "text",
+  "id": "editor_test",
+  "label": "TEST: Release index",
+  "default": "Testing"
+},
+    {
+      "type": "header",
+      "content": "Homepage content"
+    },
+    
+    {
+      "type": "text",
+      "id": "accessible_label",
+      "label": "Accessible section description",
+      "default": "Featured project and release index"
+    },
+
+    {
+      "type": "header",
+      "content": "Campaign"
+    },
+    {
+      "type": "image_picker",
+      "id": "campaign_image",
+      "label": "Campaign image"
+    },
+    {
+      "type": "text",
+      "id": "campaign_image_alt",
+      "label": "Campaign image description",
+      "default": "Campaign photography for the fashion label"
+    },
+
+{
+  "type": "header",
+  "content": "Featured project",
+  "info": "Configure the featured project panel."
+},
+    {
+      "type": "text",
+      "id": "feature_accessible_title",
+      "label": "Accessible panel heading",
+      "default": "Featured project"
+    },
+    {
+      "type": "image_picker",
+      "id": "feature_image",
+      "label": "Featured project image"
+    },
+    {
+      "type": "text",
+      "id": "feature_image_alt",
+      "label": "Featured image description",
+      "default": "Image from the featured fashion project"
+    },
+    {
+      "type": "text",
+      "id": "feature_label",
+      "label": "Small label",
+      "default": "FEATURED PROJECT"
+    },
+    {
+      "type": "text",
+      "id": "feature_title",
+      "label": "Project name",
+      "default": "CURRENT STUDY / 001"
+    },
+    {
+      "type": "textarea",
+      "id": "feature_description",
+      "label": "Project description",
+      "default": "Garment studies, material experiments, and work in progress."
+    },
+    {
+      "type": "url",
+      "id": "feature_link",
+      "label": "Project link"
+    },
+    {
+      "type": "text",
+      "id": "feature_link_label",
+      "label": "Project link text",
+      "default": "VIEW PROJECT"
+    },
+
+    {
+      "type": "header",
+      "content": "Release index"
+    },
+    {
+      "type": "text",
+      "id": "index_accessible_title",
+      "label": "Accessible index heading",
+      "default": "Release index"
+    },
+    {
+      "type": "text",
+      "id": "index_footer_text",
+      "label": "Footer text",
+      "default": "VIEW ALL RELEASES"
+    },
+    {
+      "type": "url",
+      "id": "index_footer_link",
+      "label": "Footer destination"
+    },
+
+    {
+      "type": "header",
+      "content": "Advanced"
+    },
+    {
+      "type": "liquid",
+      "id": "custom_css",
+      "label": "Custom CSS",
+      "info": "Add custom CSS rules for this section."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "release",
+      "name": "Release entry",
+      "settings": [
+        {
+          "type": "text",
+          "id": "number",
+          "label": "Number",
+          "default": "01"
+        },
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Release name",
+          "default": "CHAPTER ONE"
+        },
+        {
+          "type": "text",
+          "id": "date",
+          "label": "Date",
+          "default": "06.06.26"
+        },
+        {
+          "type": "select",
+          "id": "status",
+          "label": "Purchase status",
+          "options": [
+            {
+              "value": "AVAILABLE",
+              "label": "Available"
+            },
+            {
+              "value": "SOLD OUT",
+              "label": "Sold out"
+            },
+            {
+              "value": "NOT FOR SALE",
+              "label": "Not for sale"
+            }
+          ],
+          "default": "AVAILABLE"
+        },
+        {
+          "type": "product",
+          "id": "product",
+          "label": "Product"
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Homepage index",
+      "blocks": [
+        {
+          "type": "release"
+        },
+        {
+          "type": "release",
+          "settings": {
+            "number": "02",
+            "name": "CONSIDERED STUDY",
+            "date": "IN PROGRESS",
+            "status": "NOT FOR SALE"
+          }
+        },
+        {
+          "type": "release",
+          "settings": {
+            "number": "03",
+            "name": "PAST RELEASE",
+            "date": "ARCHIVE",
+            "status": "SOLD OUT"
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

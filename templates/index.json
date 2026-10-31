@@ -1,18 +1,47 @@
+// {
+//   "sections": {
+//     "considered": {
+//       "type": "main-considered",
+//       "settings": {}
+//     },
+//     "available": {
+//       "type": "main-available",
+//       "settings": {
+//         "products_to_show": 4
+//       }
+//     }
+//   },
+//   "order": [
+//     "considered",
+//     "available"
+//   ]
+// }
+
+// {
+//   "sections": {
+//     "hero": {
+//       "type": "main-hero",
+//       "settings": {}
+//     },
+//     "index": {
+//       "type": "main-uc-index",
+//       "settings": {}
+//     }
+//   },
+//   "order": [
+//     "hero",
+//     "index"
+//   ]
+// }
+
 {
   "sections": {
-    "considered": {
-      "type": "main-considered",
+    "main": {
+      "type": "main-uc-home",
       "settings": {}
-    },
-    "available": {
-      "type": "main-available",
-      "settings": {
-        "products_to_show": 4
-      }
     }
   },
   "order": [
-    "considered",
-    "available"
+    "main"
   ]
 }

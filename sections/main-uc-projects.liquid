@@ -1,0 +1,433 @@
+{% assign first_project = section.blocks | first %}
+
+<section class="uc-projects" aria-labelledby="uc-projects-title">
+
+  {% if first_project != blank %}
+    <div class="uc-projects__layout">
+
+  <div class="uc-projects__left">
+
+  <header class="uc-projects__header">
+    <h1 id="uc-projects-title">PROJECTS</h1>
+
+    {% if section.settings.supporting_text != blank %}
+      <p>{{ section.settings.supporting_text | escape }}</p>
+    {% endif %}
+  </header>
+
+  <div class="uc-projects__selected-copy" data-selected-copy>
+    <h2 data-selected-name>
+      {{ first_project.settings.name | escape }}
+    </h2>
+
+    {% if first_project.settings.description != blank %}
+      <div data-selected-description>
+        {{ first_project.settings.description }}
+      </div>
+    {% endif %}
+  </div>
+
+</div>
+
+      <div class="uc-projects__right" data-project-right>
+
+        <div class="uc-projects__selected-image" data-selected-image>
+          {% if first_project.settings.image != blank %}
+            {{
+              first_project.settings.image
+              | image_url: width: 2000
+              | image_tag:
+                widths: '600, 900, 1200, 1600, 2000',
+                sizes: '60vw',
+                loading: 'eager',
+                alt: first_project.settings.image_alt
+            }}
+          {% endif %}
+        </div>
+
+        <div class="uc-projects__list" aria-label="Projects">
+          {% for block in section.blocks %}
+            <button
+              class="uc-projects__item"
+              type="button"
+              data-project-item
+              data-project-name="{{ block.settings.name | escape }}"
+              data-project-description="{{ block.settings.description | escape }}"
+              data-project-image="{% if block.settings.image != blank %}{{ block.settings.image | image_url: width: 2000 }}{% endif %}"
+              data-project-alt="{{ block.settings.image_alt | escape }}"
+              aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
+              {{ block.shopify_attributes }}
+            >
+
+              <span class="uc-projects__metadata-list">
+                {% assign metadata_lines = block.settings.metadata | newline_to_br | split: '<br />' %}
+
+             {% for line in metadata_lines limit: 4 %}
+          {% assign metadata_value = line | strip %}
+
+{% if metadata_value != blank %}
+  <span class="uc-projects__metadata">
+    {{ metadata_value | escape }}
+  </span>
+{% endif %}
+                {% endfor %}
+              </span>
+            </button>
+          {% endfor %}
+        </div>
+
+      </div>
+    </div>
+  {% endif %}
+
+
+
+</section>
+
+{% stylesheet %}
+.uc-projects {
+  display: grid;
+  grid-template-columns: minmax(280px, 32%) minmax(0, 1fr);
+  height: calc(100vh - var(--header-height, 72px));
+  min-height: 600px;
+  overflow: hidden;
+  color: var(--color-foreground);
+  font-family: var(--font-mono);
+}
+
+
+  /* Page introduction */
+
+ .uc-projects__header {
+  min-width: 0;
+  max-width: 100%;
+}
+
+  .uc-projects__header h1 {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 19px;
+    font-weight: 400;
+    letter-spacing: -0.07em;
+    line-height: 1.2;
+  }
+
+  .uc-projects__header p {
+    max-width: 24rem;
+    margin: 0.75rem 0 0;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  /* Main project composition */
+
+.uc-projects__left {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(3rem, 8vh, 7rem);
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 20px;
+}
+
+.uc-projects__right {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+ padding: 24vh 0 24px 24px;
+
+}
+
+  .uc-projects__layout {
+    display: contents;
+  }
+
+.uc-projects__selected-copy {
+  position: static;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+  .uc-projects__selected-copy h2 {
+    margin: 0 0 1rem;
+    font-family: var(--font-mono);
+    font-size: 1rem;
+    font-weight: 400;
+    line-height: 1.3;
+  }
+
+  .uc-projects__selected-copy p {
+    max-width: 100%;
+    margin: 0 0 1rem;
+    color: var(--color-muted);
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    font-weight: 400;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+  }
+
+  /* Project index and reserved preview area */
+
+
+
+  .uc-projects__list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .uc-projects__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+    min-height: 3rem;
+    padding: 0.5rem 0 0.5rem 42%;
+    border: 0;
+    border-top: 1px solid var(--uc-line);
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 400;
+    line-height: 1.5;
+    cursor: crosshair;
+  }
+
+  .uc-projects__item:last-child {
+    border-bottom: 1px solid var(--uc-line);
+  }
+
+  .uc-projects__item-name {
+    min-width: 0;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 400;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+  }
+
+.uc-projects__metadata-list {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.5rem 3.5rem;
+}
+
+.uc-projects__metadata {
+  color: var(--color-muted);
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+  /* Floating image preview */
+
+  .uc-projects__selected-image {
+    position: absolute;
+    z-index: 2;
+    top: var(--project-preview-y, 12rem);
+    left: 22%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38%;
+    max-height: 75vh;
+    pointer-events: none;
+    transform: translate(-50%, -50%);
+    transition: top 350ms ease;
+  }
+
+  .uc-projects__selected-image img {
+    display: block;
+    width: 100%;
+    height: auto;
+    max-height: 75vh;
+    object-fit: contain;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .uc-projects__selected-image {
+      transition: none;
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .uc-projects {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-rows: auto auto auto;
+      row-gap: 2.5rem;
+      min-height: auto;
+    }
+
+    .uc-projects__header {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .uc-projects__selected-copy {
+      position: static;
+      grid-column: 1;
+      grid-row: 2;
+    }
+
+    .uc-projects__right {
+      grid-column: 1;
+      grid-row: 3;
+      padding-top: 0;
+    }
+
+    .uc-projects__selected-image {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: 100%;
+      max-height: none;
+      margin-bottom: 2rem;
+      transform: none;
+    }
+
+    .uc-projects__selected-image img {
+      max-height: 60vh;
+    }
+
+    .uc-projects__item {
+      padding-left: 0;
+    }
+  }
+{% endstylesheet %}
+
+<script>
+  (() => {
+    const section = document.currentScript.closest('.shopify-section');
+    if (!section) return;
+
+    const nameDisplay = section.querySelector('[data-selected-name]');
+    const descriptionDisplay = section.querySelector('[data-selected-description]');
+    const imageDisplay = section.querySelector('[data-selected-image]');
+    const rightColumn = section.querySelector('[data-project-right]');
+    const projectItems = section.querySelectorAll('[data-project-item]');
+
+    if (!nameDisplay || !imageDisplay || !rightColumn || !projectItems.length) return;
+
+    let activeItem = projectItems[0];
+
+    function positionImage(item) {
+      const itemRect = item.getBoundingClientRect();
+      const rightRect = rightColumn.getBoundingClientRect();
+
+      const centerY = itemRect.top + itemRect.height / 2 - rightRect.top;
+
+      imageDisplay.style.setProperty('--project-preview-y', `${centerY}px`);
+    }
+
+    function selectProject(item) {
+      activeItem = item;
+
+      nameDisplay.textContent = item.dataset.projectName;
+
+      if (descriptionDisplay) {
+        descriptionDisplay.innerHTML = item.dataset.projectDescription || '';
+      }
+
+      imageDisplay.replaceChildren();
+
+      if (item.dataset.projectImage) {
+        const image = document.createElement('img');
+        image.src = item.dataset.projectImage;
+        image.alt = item.dataset.projectAlt || item.dataset.projectName;
+        image.loading = 'eager';
+        imageDisplay.appendChild(image);
+      }
+
+      projectItems.forEach((project) => {
+        project.setAttribute(
+          'aria-pressed',
+          project === item ? 'true' : 'false'
+        );
+      });
+
+      positionImage(item);
+    }
+
+    projectItems.forEach((item) => {
+      item.addEventListener('mouseenter', () => selectProject(item));
+      item.addEventListener('focus', () => selectProject(item));
+      item.addEventListener('click', () => selectProject(item));
+    });
+
+    window.addEventListener('resize', () => {
+      if (activeItem) positionImage(activeItem);
+    });
+
+    selectProject(activeItem);
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Projects",
+  "settings": [
+    {
+      "type": "textarea",
+      "id": "supporting_text",
+      "label": "Supporting text",
+      "default": "A collection of considered work, released garments, ongoing studies, and archived projects."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "project",
+      "name": "Project",
+      "settings": [
+        {
+          "type": "text",
+          "id": "name",
+          "label": "Project name",
+          "default": "Project name"
+        },
+        {
+          "type": "image_picker",
+          "id": "image",
+          "label": "Project image"
+        },
+        {
+          "type": "text",
+          "id": "image_alt",
+          "label": "Image description"
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Project description"
+        },
+     {
+  "type": "textarea",
+  "id": "metadata",
+  "label": "Project metadata",
+  "info": "Add up to four short descriptors, one per line. Example: TOPS"
+}
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Projects"
+    }
+  ]
+}
+{% endschema %}

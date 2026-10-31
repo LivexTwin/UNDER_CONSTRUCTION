@@ -27,6 +27,7 @@
     {{ 'uc-cart.css' | asset_url | stylesheet_tag }}
     {{ 'uc-collection.css' | asset_url | stylesheet_tag }}
     {{ 'uc-search.css' | asset_url | stylesheet_tag }}
+    {{ 'uc-header.css' | asset_url | stylesheet_tag }}
     {{ content_for_header }}
   </head>
 
@@ -40,6 +41,5 @@
     </main>
 
     {% sections 'footer-group' %}
-    <script src="{{ 'uc-considered.js' | asset_url }}" defer="defer"></script>
   </body>
 </html>

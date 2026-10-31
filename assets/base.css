@@ -6,6 +6,11 @@
   --color-surface: #e9e8e2;
   --color-line: #c8c7c0;
   --color-accent: #0047ff;
+  --uc-paper-shadow: #d5d1c7;
+  --uc-ink: #252621;
+  --uc-muted: #77776e;
+  --uc-rule: rgba(37, 38, 33, 0.24);
+  --uc-accent: #3455db;
 
   --font-body: Arial, Helvetica, sans-serif;
   --font-mono: "Courier New", Courier, monospace;
@@ -81,11 +86,6 @@ button {
   cursor: pointer;
 }
 
-:focus-visible {
-  outline: 2px solid var(--color-accent);
-  outline-offset: 4px;
-}
-
 .skip-link {
   position: absolute;
   z-index: 100;
@@ -125,7 +125,6 @@ button {
   position: relative;
   z-index: 10;
   background: var(--color-background);
-  border-bottom: 1px solid var(--color-line);
 }
 
 .header-inner {

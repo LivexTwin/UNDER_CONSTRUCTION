@@ -1,43 +1,118 @@
-/* Collection page */
 
 .collection-page {
-  padding-top: clamp(2.5rem, 6vw, 6rem);
-  padding-bottom: var(--space-section);
+  display: grid;
+  grid-template-columns: minmax(190px, 240px) minmax(0, 1fr);
+  height: calc(100vh - var(--header-height, 72px));
+  min-height: 600px;
+  overflow: hidden;
 }
 
-.collection-header {
-  max-width: 760px;
-  margin-bottom: clamp(2.5rem, 5vw, 5rem);
+.collection-index {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px 20px;
+  font-family: monospace;
+  font-size: 11px;
 }
 
-.collection-eyebrow {
-  margin: 0 0 1.25rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  letter-spacing: 0.04em;
+.collection-index-heading,
+.collection-index-group {
+  display: grid;
+  gap: 10px;
+}
+
+.collection-index-heading p,
+.collection-index-label,
+.collection-index-note {
+  margin: 0;
+  font-size: 10px;
+  letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
-.collection-title {
+.collection-index-heading h2 {
   margin: 0;
-  font-size: clamp(2.75rem, 8vw, 7rem);
-  line-height: 0.95;
-  letter-spacing: -0.065em;
-  overflow-wrap: anywhere;
+  font: inherit;
+  font-size: 16px;
 }
 
-.collection-description {
-  max-width: 560px;
-  margin-top: 1.5rem;
-  color: var(--color-muted);
-  font-size: 1rem;
+.collection-index-group > p,
+.collection-index-group > a {
+  margin: 0;
+}
+
+.collection-index-group a {
+  text-decoration: none;
+}
+
+.collection-index-description {
   line-height: 1.6;
 }
 
+
+
+.collection-workspace {
+  min-width: 0;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 24px;
+}
+
+.collection-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.collection-toolbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: monospace;
+  font-size: 11px;
+}
+
+.collection-toolbar-controls select {
+  max-width: 180px;
+  padding: 6px;
+  border: 1px solid currentColor;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
+@media (max-width: 760px) {
+  .collection-page {
+    display: block;
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+
+  .collection-index {
+    border-right: 0;
+    border-bottom: 1px solid currentColor;
+    overflow: visible;
+  }
+
+  .collection-workspace {
+    overflow: visible;
+    padding: 20px 16px;
+  }
+}
+
+
+/* Product grid */
 .collection-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 3rem 1rem;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 28px 16px;
 }
 
 .collection-card {
@@ -47,8 +122,9 @@
 .collection-card-image {
   display: block;
   overflow: hidden;
-  background: var(--color-surface);
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 3 / 4;
+  background: var(--uc-paper-shadow);
+  color: var(--uc-ink);
 }
 
 .collection-card-image img {
@@ -56,11 +132,11 @@
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: opacity 180ms ease;
+  transition: opacity 160ms ease;
 }
 
 .collection-card-image:hover img {
-  opacity: 0.85;
+  opacity: 0.88;
 }
 
 .collection-card-placeholder {
@@ -68,24 +144,28 @@
   width: 100%;
   height: 100%;
   place-items: center;
-  padding: 1rem;
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
+  padding: 16px;
+  font: 10px "Courier New", monospace;
   text-align: center;
 }
 
 .collection-card-info {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  align-items: baseline;
-  gap: 0.4rem 1rem;
-  padding-top: 0.8rem;
+  display: grid;
+  gap: 5px;
+  padding-top: 10px;
+}
+
+.collection-card-reference {
+  margin: 0;
+  color: var(--uc-muted);
+  font: 9px "Courier New", monospace;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 
 .collection-card-title {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 13px;
   font-weight: 400;
   line-height: 1.4;
 }
@@ -96,87 +176,251 @@
 }
 
 .collection-card-title a:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
+  color: var(--uc-accent);
 }
 
-.collection-card-price,
-.collection-card-status {
+.collection-card-price {
   margin: 0;
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
+  font: 11px "Courier New", monospace;
 }
 
-.collection-card-status {
-  flex-basis: 100%;
-  color: var(--color-muted);
+@media (min-width: 1100px) {
+  .collection-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 36px 20px;
+  }
 }
 
-.collection-pagination {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-top: 4rem;
-  padding-top: 1rem;
-  border-top: 1px solid var(--color-line);
-  font-family: var(--font-mono);
-  font-size: 0.75rem;
-}
-
-.collection-pagination a {
-  color: inherit;
-  text-decoration: none;
-}
-
-.collection-pagination a:hover {
-  text-decoration: underline;
-  text-underline-offset: 3px;
-}
-
-.pagination-disabled {
-  color: var(--color-muted);
-}
-
-.pagination-count {
-  text-align: center;
-}
-
-.collection-empty {
-  padding: 4rem 0;
-  border-top: 1px solid var(--color-line);
-  font-family: var(--font-mono);
-  font-size: 0.8rem;
-}
-
-.collection-empty a {
-  display: inline-block;
-  margin-top: 1rem;
-  color: inherit;
-  text-underline-offset: 3px;
-}
-
-@media screen and (max-width: 749px) {
+@media (max-width: 760px) {
   .collection-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 2rem 0.75rem;
-  }
-
-  .collection-card-info {
-    display: block;
-  }
-
-  .collection-card-price {
-    margin-top: 0.35rem;
-  }
-
-  .collection-pagination {
-    font-size: 0.65rem;
+    gap: 24px 12px;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .collection-card-image img {
+    transition: none;
+  }
+}
+
+
+
+
+/* UNDER CONSTRUCTION — ANALOG CATALOG */
+
+.collection-page {
+  background: var(--uc-paper);
+  color: var(--uc-ink);
+  gap: 0;
+}
+
+.collection-index {
+  position: relative;
+  gap: 0;
+  padding: 0 18px 20px;
+  background: var(--uc-paper);
+  color: var(--uc-ink);
+  font-family: "Courier New", monospace;
+  font-size: 11px;
+  line-height: 1.45;
+  scrollbar-width: thin;
+  scrollbar-color: var(--uc-paper-shadow) transparent;
+}
+
+/* Receipt heading */
+.collection-index-heading {
+  gap: 5px;
+  padding: 20px 0 18px;
+  border-bottom: 1px dashed var(--uc-rule);
+}
+
+.collection-index-heading p,
+.collection-index-label,
+.collection-index-note {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.collection-index-heading h2 {
+  font-size: 19px;
+  font-weight: 400;
+  letter-spacing: -0.07em;
+}
+
+/* Each filter becomes a receipt entry */
+.collection-index-group {
+  gap: 12px;
+  padding: 17px 0;
+  border-bottom: 1px dashed var(--uc-rule);
+}
+
+.collection-index-label {
+  width: fit-content;
+  padding-bottom: 4px;
+  border-bottom: 1px dotted rgba(37, 38, 33, 0.24);
+  color: var(--uc-muted);
+}
+
+.collection-index-group > p:not(.collection-index-label) {
+  line-height: 1.5;
+}
+
+.collection-filter-values {
+  gap: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.collection-filter-values li {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+ 
+}
+
+.collection-filter-values li:last-child {
+  border-bottom: 0;
+}
+
+.collection-filter-values a {
+  align-items: baseline;
+  padding: 7px 0;
+  color: inherit;
+  text-decoration: none;
+  transition: color 140ms ease;
+}
+
+.collection-filter-values a:hover {
+  color: var(--uc-accent);
+}
+
+.collection-filter-values a[aria-current="true"] {
+  color: var(--uc-accent);
+  text-decoration: none;
+}
+
+.collection-filter-values a[aria-current="true"] span:first-child::before {
+  content: "▶ ";
+  font-size: 8px;
+}
+
+
+/* Catalog workspace */
+.collection-workspace {
+  background: var(--uc-paper);
+  color: var(--uc-ink);
+}
+
+.collection-toolbar {
+  padding-bottom: 14px;
+}
+
+.collection-eyebrow,
+.collection-toolbar-controls {
+  font-family: "Courier New", monospace;
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.collection-toolbar-controls select,
+.collection-price-filter input,
+.collection-price-filter button {
+  border-color: var(--uc-rule);
+  background: transparent;
+  color: var(--uc-ink);
+  font-family: "Courier New", monospace;
+}
+
+.collection-price-filter input:focus,
+.collection-price-filter button:focus,
+.collection-toolbar-controls select:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.collection-price-filter button {
+  text-transform: uppercase;
+  transition:
+    background 140ms ease,
+    color 140ms ease;
+}
+
+.collection-price-filter button:hover {
+  background: var(--uc-ink);
+  color: var(--uc-paper);
+}
+
+/* Collection workspace hero */
+.uc-collection-hero {
+  margin-bottom: 28px;
+}
+
+.uc-collection-hero-media {
+  display: block;
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  background: var(--uc-paper, #e9e6dd);
+}
+
+.uc-collection-hero-media img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Optional deliberate crop */
+.uc-collection-hero-media--crop {
+  aspect-ratio: 2 / 1;
+  overflow: hidden;
+}
+
+.uc-collection-hero-media--crop img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.uc-collection-hero-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 10px;
+}
+
+.uc-collection-hero-caption h2,
+.uc-collection-hero-caption p {
+  margin: 0;
+}
+
+.uc-collection-hero-caption h2 {
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.uc-collection-hero-caption p {
+  font-size: 11px;
+}
+
+@media (max-width: 760px) {
+  .collection-index {
+    border-bottom: 1px solid var(--uc-rule);
+  }
+
+  .collection-index-heading {
+    padding-top: 16px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .collection-filter-values a,
+  .collection-price-filter button {
     transition: none;
   }
 }

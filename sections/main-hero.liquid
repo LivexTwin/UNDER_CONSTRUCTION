@@ -1,0 +1,125 @@
+
+<section class="uc-home-hero" aria-labelledby="uc-home-hero-title-{{ section.id }}">
+  <h1 id="uc-home-hero-title-{{ section.id }}" class="uc-visually-hidden">
+    {{ section.settings.accessible_title | escape }}
+  </h1>
+
+  {% if section.settings.image != blank %}
+    <div class="uc-home-hero__image">
+      {{
+        section.settings.image
+        | image_url: width: 2000
+        | image_tag:
+          widths: '600, 900, 1200, 1600, 2000',
+          sizes: '(min-width: 1200px) 1200px, 100vw',
+          loading: 'eager',
+          fetchpriority: 'high',
+          alt: section.settings.image_alt
+      }}
+    </div>
+  {% else %}
+    <div class="uc-home-hero__placeholder">
+      <span>CAMPAIGN IMAGE / NOT YET SELECTED</span>
+    </div>
+  {% endif %}
+</section>
+
+{% stylesheet %}
+.uc-visually-hidden {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0, 0, 0, 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
+}
+
+
+.uc-home-hero,
+.uc-home-hero * {
+  box-sizing: border-box;
+}
+
+.uc-home-hero {
+  width: 100%;
+  max-width: 1200px;
+  height: clamp(220px, 100svh, 420px);
+  min-width: 0;
+  margin-inline: auto;
+  overflow: hidden;
+  color: var(--uc-ink, #252621);
+}
+
+.uc-home-hero__image {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+}
+
+.uc-home-hero__image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+
+.uc-home-hero__placeholder {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  background: var(--uc-paper, #f5f4f0);
+  border: 1px solid var(--uc-rule, rgba(37, 38, 33, 0.24));
+  font: 11px/1.5 "Courier New", monospace;
+}
+
+/* @media (max-height: 800px) {
+  .uc-home-hero {
+    height: 32svh;
+  }
+} */
+
+@media (max-width: 700px) {
+  .uc-home-hero {
+    height: 28svh;
+    min-height: 180px;
+  }
+}
+
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Main hero",
+  "settings": [
+    {
+      "type": "text",
+      "id": "accessible_title",
+      "label": "Accessible page heading",
+      "default": "Independent fashion and garment archive"
+    },
+    {
+      "type": "image_picker",
+      "id": "image",
+      "label": "Campaign image"
+    },
+    {
+      "type": "text",
+      "id": "image_alt",
+      "label": "Image description",
+      "default": "Campaign photography for the fashion label"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Main hero"
+    }
+  ]
+}
+{% endschema %}

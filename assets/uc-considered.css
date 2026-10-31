@@ -420,22 +420,23 @@ a.uc-information-link:hover .uc-link-arrow {
   }
 }
 
-
-/* DESKTOP — THREE IMAGES ALWAYS RETAIN THEIR POSITIONS */
+/* EDITORIAL IMAGE INTERACTION */
 
 .uc-editorial-image {
-  transition:
-    transform 320ms ease,
-    filter 320ms ease;
+  transform: scale(1);
   transform-origin: center;
+  filter: saturate(0.82) contrast(1.04);
+  transition:
+    transform 420ms cubic-bezier(0.2, 0.65, 0.3, 1),
+    filter 420ms ease;
 }
 
 @media (min-width: 761px) and (hover: hover) and (pointer: fine) {
   .uc-editorial-composition.is-active-left .uc-editorial-left,
   .uc-editorial-composition.is-active-right .uc-editorial-right {
     z-index: 4;
-    transform: scale(1.035);
-    filter: brightness(1.04);
+    transform: scale(1.045);
+    filter: saturate(1) contrast(0.96);
   }
 }
 
