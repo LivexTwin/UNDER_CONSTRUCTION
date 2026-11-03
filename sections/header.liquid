@@ -19,57 +19,63 @@
     </nav>
 
     <div class="header-utility">
-      <div class="uc-search-inline" data-uc-search-inline>
-        <button
-          class="header-utility-button"
-          type="button"
-          data-uc-toggle="search"
-          aria-expanded="false"
-          aria-controls="uc-search-input"
-        >
-          SEARCH
-        </button>
+   <div class="uc-search-inline" data-uc-search-inline>
+  <button
+    class="header-utility-button"
+    type="button"
+    data-uc-toggle="search"
+    aria-expanded="false"
+    aria-controls="uc-search-input"
+  >
+    SEARCH
+  </button>
 
-        <form
-          class="uc-search-inline-form"
-          action="{{ routes.search_url }}"
-          method="get"
-          role="search"
-          hidden
-        >
-          <label class="visually-hidden" for="uc-search-input">
-            Search products
-          </label>
+  <form
+    class="uc-search-inline-form"
+    action="{{ routes.search_url }}"
+    method="get"
+    role="search"
+    hidden
+  >
+    <label class="visually-hidden" for="uc-search-input">
+      Search products
+    </label>
 
-          <input
-            id="uc-search-input"
-            type="search"
-            name="q"
-            placeholder="Search..."
-            autocomplete="off"
-            data-uc-search-input
-          >
+    <input
+      id="uc-search-input"
+      type="search"
+      name="q"
+      placeholder="Search..."
+      autocomplete="off"
+      data-uc-search-input
+    >
 
-          <input type="hidden" name="type" value="product">
+    <input type="hidden" name="type" value="product">
 
-          <button type="button" data-uc-close aria-label="Close search">×</button>
-        </form>
+    <button
+      type="button"
+      data-uc-close
+      aria-label="Close search"
+    >X</button>
+  </form>
 
-        <div
-          class="uc-search-results"
-          data-uc-search-results
-          aria-live="polite"
-        ></div>
+  <div class="uc-search-dropdown">
+    <a
+      class="uc-view-all"
+      href="{{ routes.search_url }}"
+      data-uc-view-all
+      hidden
+    >
+      VIEW ALL RESULTS ↗
+    </a>
 
-        <a
-          class="uc-view-all"
-          href="{{ routes.search_url }}"
-          data-uc-view-all
-          hidden
-        >
-          VIEW ALL RESULTS ↗
-        </a>
-      </div>
+    <div
+      class="uc-search-results"
+      data-uc-search-results
+      aria-live="polite"
+    ></div>
+  </div>
+</div>
 
 <button
   class="header-utility-button"

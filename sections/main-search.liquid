@@ -1,116 +1,264 @@
-<section class="search-page page-width">
-  <header class="search-header">
-    <p class="search-eyebrow">INDEX / SEARCH</p>
-    <h1 class="search-title">Search the catalog.</h1>
 
-    <form action="{{ routes.search_url }}" method="get" role="search" class="search-form">
-      <label class="visually-hidden" for="SearchInput">Search products and content</label>
-      <input
-        id="SearchInput"
-        class="search-input"
-        type="search"
-        name="q"
-        value="{{ search.terms | escape }}"
-        placeholder="Enter a search term..."
-        autocomplete="off"
-      >
-      <button class="search-submit" type="submit">SEARCH →</button>
-    </form>
-  </header>
+<section class="collection-page">
 
-  {% if search.performed %}
-    <div class="search-results-header">
-      <p>
-        {% if search.results_count == 0 %}
-          NO RESULTS / {{ search.terms | escape }}
-        {% else %}
-          {{ search.results_count }} RESULTS / {{ search.terms | escape }}
-        {% endif %}
-      </p>
+  <aside class="collection-index" aria-label="Search filters">
+    <div class="collection-index-heading">
+      <h2>{{ section.settings.index_title | escape }}</h2>
     </div>
 
-    {% paginate search.results by 12 %}
-      {% if search.results.size > 0 %}
-        <div class="search-results-grid">
-          {% for result in search.results %}
-            <article class="search-result">
-              <a class="search-result-image" href="{{ result.url }}">
-                {% if result.object_type == 'product' and result.featured_image %}
-                  {{
-                    result.featured_image
-                    | image_url: width: 700
-                    | image_tag:
-                      loading: 'lazy',
-                      widths: '300, 500, 700',
-                      alt: result.featured_image.alt
-                  }}
-                {% elsif result.object_type == 'article' and result.image %}
-                  {{
-                    result.image
-                    | image_url: width: 700
-                    | image_tag:
-                      loading: 'lazy',
-                      widths: '300, 500, 700',
-                      alt: result.image.alt
-                  }}
-                {% else %}
-                  <div class="search-result-placeholder">
-                    {{ result.object_type | upcase }}
-                  </div>
+    {% if search.performed %}
+      {% for filter in search.filters %}
+        <div class="collection-index-group">
+          <p class="collection-index-label">
+            {% case filter.type %}
+              {% when 'price_range' %}
+                PRICE
+              {% else %}
+                {{ filter.label | escape }}
+            {% endcase %}
+          </p>
+
+          {% if filter.type == 'price_range' %}
+            <form class="collection-price-filter" method="get" action="{{ routes.search_url }}">
+
+              <input type="hidden" name="q" value="{{ search.terms | escape }}">
+              <input type="hidden" name="type" value="product">
+
+              {% for active_filter in search.filters %}
+                {% unless active_filter.type == 'price_range' %}
+                  {% for value in active_filter.active_values %}
+                    <input
+                      type="hidden"
+                      name="{{ value.param_name | escape }}"
+                      value="{{ value.value | escape }}"
+                    >
+                  {% endfor %}
+                {% endunless %}
+              {% endfor %}
+
+              <label for="SearchFilter-{{ filter.param_name }}-GTE">MIN</label>
+              <input
+                id="SearchFilter-{{ filter.param_name }}-GTE"
+                name="{{ filter.min_value.param_name }}"
+                type="number"
+                min="0"
+                placeholder="0"
+                {% if filter.min_value.value %}
+                  value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
                 {% endif %}
-              </a>
+              >
 
-              <div class="search-result-info">
-                <p class="search-result-type">
-                  {{ result.object_type | upcase }}
-                </p>
+              <label for="SearchFilter-{{ filter.param_name }}-LTE">MAX</label>
+              <input
+                id="SearchFilter-{{ filter.param_name }}-LTE"
+                name="{{ filter.max_value.param_name }}"
+                type="number"
+                min="0"
+                placeholder="—"
+                {% if filter.max_value.value %}
+                  value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                {% endif %}
+              >
 
-                <h2 class="search-result-title">
-                  <a href="{{ result.url }}">{{ result.title | escape }}</a>
-                </h2>
+              <button type="submit">APPLY</button>
+            </form>
 
-                {% if result.object_type == 'product' %}
-                  <p class="search-result-price">
-                    {% if result.price_varies %}
-                      {{ result.price_min | money }} – {{ result.price_max | money }}
-                    {% else %}
-                      {{ result.price | money }}
+          {% else %}
+            <ul class="collection-filter-values" role="list">
+              {% for value in filter.values %}
+                <li>
+                  <a
+                    href="{{ value.url_to_add | default: value.url_to_remove }}"
+                    {% if value.active %}aria-current="true"{% endif %}
+                  >
+                    <span>{{ value.label | escape }}</span>
+                    {% if value.active %}
+                      <span aria-hidden="true"> ×</span>
                     {% endif %}
-                  </p>
-                {% elsif result.content != blank %}
-                  <p class="search-result-excerpt">
-                    {{ result.content | strip_html | truncate: 140 | escape }}
-                  </p>
-                {% endif %}
-              </div>
-            </article>
-          {% endfor %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          {% endif %}
         </div>
+      {% endfor %}
+    {% endif %}
+  </aside>
 
-        {% if paginate.pages > 1 %}
-          <nav class="search-pagination" aria-label="Search result pages">
-            {% if paginate.previous %}
-              <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
-            {% else %}
-              <span>← PREVIOUS</span>
-            {% endif %}
+  <div class="collection-workspace">
 
-            <span>PAGE {{ paginate.current_page }} / {{ paginate.pages }}</span>
-
-            {% if paginate.next %}
-              <a href="{{ paginate.next.url }}">NEXT →</a>
-            {% else %}
-              <span>NEXT →</span>
-            {% endif %}
-          </nav>
+    <header class="collection-toolbar">
+      <p class="collection-eyebrow">
+        {% if search.performed %}
+          SEARCH: {{ search.terms | escape }} /
+          {{ search.results_count }} ITEMS
+        {% else %}
+          SEARCH
         {% endif %}
-      {% else %}
-        <div class="search-empty">
-          <p>NOTHING FOUND.</p>
-          <p>Try another term or browse the available products.</p>
-          <a href="{{ routes.all_products_collection_url }}">VIEW ALL PRODUCTS →</a>
+      </p>
+
+      {% if search.performed %}
+        <div class="collection-toolbar-controls">
+          <label for="SearchSort">SORT</label>
+          <select id="SearchSort" name="sort_by">
+            {% assign sort_by = search.sort_by | default: search.default_sort_by %}
+
+            {% for option in search.sort_options %}
+              <option
+                value="{{ option.value | escape }}"
+                {% if option.value == sort_by %}selected{% endif %}
+              >
+                {{ option.name | escape }}
+              </option>
+            {% endfor %}
+          </select>
         </div>
       {% endif %}
-    {% endpaginate %}
-  {% endif %}
+    </header>
+
+    {% if search.performed %}
+
+      {% paginate search.results by section.settings.products_per_page %}
+
+        {% assign product_count = 0 %}
+
+        {% for result in search.results %}
+          {% if result.object_type == 'product' %}
+            {% assign product_count = product_count | plus: 1 %}
+          {% endif %}
+        {% endfor %}
+
+        {% if product_count > 0 %}
+
+          <div class="collection-grid">
+
+            {% for result in search.results %}
+              {% if result.object_type == 'product' %}
+
+                <article class="collection-card">
+                  <a
+                    class="collection-card-image"
+                    href="{{ result.url }}"
+                    aria-label="{{ result.title | escape }}"
+                  >
+                    {% if result.featured_image %}
+                      {{
+                        result.featured_image
+                        | image_url: width: 1000
+                        | image_tag:
+                          loading: 'lazy',
+                          widths: '300, 500, 700, 1000',
+                          sizes: '(min-width: 1200px) 40vw, (min-width: 761px) 35vw, 50vw',
+                          alt: result.featured_image.alt
+                      }}
+                    {% else %}
+                      <div class="collection-card-placeholder">
+                        IMAGE NOT AVAILABLE
+                      </div>
+                    {% endif %}
+                  </a>
+
+                  <div class="collection-card-info">
+
+                    <h2 class="collection-card-title">
+                      <a href="{{ result.url }}">
+                        {{ result.title | escape }}
+                      </a>
+                    </h2>
+
+                    <p class="collection-card-price">
+                      {% if result.price_varies %}
+                        {{ result.price_min | money }} – {{ result.price_max | money }}
+                      {% else %}
+                        {{ result.price | money }}
+                      {% endif %}
+                    </p>
+
+                  </div>
+                </article>
+
+              {% endif %}
+            {% endfor %}
+
+          </div>
+
+          {% if paginate.pages > 1 %}
+            <nav class="collection-pagination" aria-label="Pagination">
+
+              {% if paginate.previous %}
+                <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
+              {% else %}
+                <span class="pagination-disabled">← PREVIOUS</span>
+              {% endif %}
+
+              <span class="pagination-count">
+                PAGE {{ paginate.current_page }} / {{ paginate.pages }}
+              </span>
+
+              {% if paginate.next %}
+                <a href="{{ paginate.next.url }}">NEXT →</a>
+              {% else %}
+                <span class="pagination-disabled">NEXT →</span>
+              {% endif %}
+
+            </nav>
+          {% endif %}
+
+        {% else %}
+
+          <div class="collection-empty">
+            <p>NO PRODUCTS FOUND FOR "{{ search.terms | escape }}".</p>
+            <a href="{{ routes.all_products_collection_url }}">VIEW ALL PRODUCTS →</a>
+          </div>
+
+        {% endif %}
+
+      {% endpaginate %}
+
+    {% else %}
+
+      <div class="collection-empty">
+        <p>ENTER A SEARCH TERM TO FIND PRODUCTS.</p>
+      </div>
+
+    {% endif %}
+
+  </div>
 </section>
+
+<script>
+  (() => {
+    const sortSelect = document.querySelector('#SearchSort');
+    if (!sortSelect) return;
+
+    sortSelect.addEventListener('change', () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('sort_by', sortSelect.value);
+      url.searchParams.delete('page');
+      window.location.href = url.toString();
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Main search",
+  "settings": [
+    {
+      "type": "range",
+      "id": "products_per_page",
+      "label": "Products per page",
+      "min": 4,
+      "max": 24,
+      "step": 4,
+      "default": 12
+    },
+    {
+      "type": "text",
+      "id": "index_title",
+      "label": "Index heading",
+      "default": "CATALOG"
+    }
+  ]
+}
+{% endschema %}

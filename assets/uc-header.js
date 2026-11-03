@@ -45,9 +45,24 @@ function closeSearch() {
   searchForm.hidden = true;
 
   const button = searchInline.querySelector('[data-uc-toggle="search"]');
+
   if (button) {
     button.hidden = false;
     button.setAttribute('aria-expanded', 'false');
+  }
+
+  clearTimeout(searchTimer);
+  searchController?.abort();
+
+  if (searchInput) {
+    searchInput.value = '';
+  }
+
+  searchResults?.replaceChildren();
+
+  if (viewAll) {
+    viewAll.hidden = true;
+    viewAll.removeAttribute('href');
   }
 }
 
@@ -92,13 +107,62 @@ function openPanel(name) {
 
   if (wasOpen) return;
 
-panel.hidden = false;
-button.setAttribute('aria-expanded', 'true');
-cartLabel.hidden = true;
-cartCloseLabel.hidden = false;
-cartButton.setAttribute('aria-label', 'Close cart');
-renderCart();
-}
+    panel.hidden = false;
+    button.setAttribute('aria-expanded', 'true');
+    cartLabel.hidden = true;
+    cartCloseLabel.hidden = false;
+    cartButton.setAttribute('aria-label', 'Close cart');
+    renderCart();
+    }
+
+
+    // Product add-to-cart
+const productForm = document.querySelector('#ProductForm');
+
+productForm?.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const submitButton = productForm.querySelector('[name="add"]');
+  if (!submitButton || submitButton.disabled) return;
+
+  const originalLabel = submitButton.textContent.trim();
+
+  submitButton.disabled = true;
+  submitButton.textContent = 'ADDING…';
+
+  try {
+    const response = await fetch(`${routes.cart}/add.js`, {
+      method: 'POST',
+      headers: {
+        Accept: 'application/json'
+      },
+      body: new FormData(productForm)
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.description || 'Unable to add product');
+    }
+
+    submitButton.textContent = originalLabel;
+
+    const cartPanel = header.querySelector('[data-uc-panel="cart"]');
+
+    if (cartPanel?.hidden) {
+      openPanel('cart');
+    } else {
+      renderCart();
+    }
+
+  } catch (error) {
+    console.error('Add to cart failed:', error);
+    submitButton.textContent = 'TRY AGAIN';
+
+  } finally {
+    submitButton.disabled = false;
+  }
+});
 
   toggles.forEach((button) => {
     button.addEventListener('click', () => {
@@ -126,42 +190,58 @@ renderCart();
   }
 
   function renderSearch(products, query) {
-    searchResults.replaceChildren();
-    viewAll.hidden = !query.trim();
+  searchResults.replaceChildren();
 
-    const searchUrl = new URL(routes.search, location.origin)
-    searchUrl.searchParams.set('q', query);
-    searchUrl.searchParams.set('type', 'product');
-    viewAll.href = searchUrl.toString();
+  const hasQuery = query.trim().length > 0;
+  const hasResults = products.length > 0;
 
-    if (!query.trim()) return;
+  // Only show View All when products are found.
+  viewAll.hidden = !hasQuery || !hasResults;
 
-    if (!products.length) {
-      searchResults.append(makeElement('p', 'uc-search-status', 'NO MATCHING PRODUCTS'));
-      return;
+  if (!hasQuery) {
+    viewAll.removeAttribute('href');
+    return;
+  }
+
+  if (!hasResults) {
+    viewAll.removeAttribute('href');
+    searchResults.append(
+      makeElement('p', 'uc-search-status', 'NO PRODUCTS FOUND')
+    );
+    return;
+  }
+
+  const searchUrl = new URL(routes.search, location.origin);
+  searchUrl.searchParams.set('q', query);
+  searchUrl.searchParams.set('type', 'product');
+  viewAll.href = searchUrl.toString();
+
+  products.slice(0, 3).forEach((product) => {
+    const link = makeElement('a', 'uc-search-result');
+    link.href = product.url;
+
+    if (product.image) {
+      const image = document.createElement('img');
+      image.src = product.image;
+      image.alt = '';
+      image.loading = 'lazy';
+      link.append(image);
     }
 
-    products.forEach((product) => {
-      const link = makeElement('a', 'uc-search-result');
-      link.href = product.url;
+    const copy = makeElement('span', 'uc-search-result-copy');
+    copy.append(
+      makeElement('span', '', product.title),
+      makeElement(
+        'span',
+        'uc-search-result-price',
+        money(Number(product.price) * 100)
+      )
+    );
 
-      if (product.image) {
-        const image = document.createElement('img');
-        image.src = product.image;
-        image.alt = '';
-        image.loading = 'lazy';
-        link.append(image);
-      }
-
-      const copy = makeElement('span', 'uc-search-result-copy');
-      copy.append(
-        makeElement('span', '', product.title),
-        makeElement('span', 'uc-search-result-price', money(product.price))
-      );
-      link.append(copy);
-      searchResults.append(link);
-    });
-  }
+    link.append(copy);
+    searchResults.append(link);
+  });
+}
 
   searchInput?.addEventListener('input', () => {
     const query = searchInput.value.trim();
@@ -176,45 +256,55 @@ renderCart();
     searchTimer = setTimeout(async () => {
       searchController = new AbortController();
 
-      try {
-        const url = new URL(routes.predictiveSearch, location.origin)
-        url.searchParams.set('q', query);
-        url.searchParams.set('resources[type]', 'product');
-        url.searchParams.set('resources[limit]', '5');
-        url.searchParams.set('resources[options][unavailable_products]', 'last');
-        url.searchParams.set('section_id', 'uc-predictive-search');
+     try {
+  const url = new URL(routes.predictiveSearch, window.location.origin);
 
-        const response = await fetch(url, {
-          signal: searchController.signal,
-          headers: { Accept: 'application/json' }
-        });
+  url.pathname = `${url.pathname.replace(/\/$/, '').replace(/\.json$/, '')}.json`;
 
-        if (!response.ok) throw new Error('Search failed');
+  url.searchParams.set('q', query);
+  url.searchParams.set('resources[type]', 'product');
+  url.searchParams.set('resources[limit]', '5');
+  url.searchParams.set('resources[options][unavailable_products]', 'last');
 
-        const data = await response.json();
-        const products =
-          data.resources?.results?.products ||
-          data.products ||
-          [];
+  const response = await fetch(url, {
+    signal: searchController.signal,
+    headers: { Accept: 'application/json' }
+  });
 
-        renderSearch(products, query);
-      } catch (error) {
-        if (error.name !== 'AbortError') {
-          searchResults.replaceChildren(
-            makeElement('p', 'uc-search-status', 'SEARCH TEMPORARILY UNAVAILABLE')
-          );
-        }
-      }
+  if (!response.ok) {
+    throw new Error(`Search failed: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const products = data.resources?.results?.products || [];
+
+  renderSearch(products, query);
+
+} catch (error) {
+  if (error.name !== 'AbortError') {
+    console.error('Predictive search error:', error);
+
+    searchResults.replaceChildren(
+      makeElement('p', 'uc-search-status', 'SEARCH TEMPORARILY UNAVAILABLE')
+    );
+  }
+}
     }, 180);
   });
 
   async function getCart() {
-    const response = await 	fetch($.js, {
-      headers: { Accept: 'application/json' }
-    });
-    if (!response.ok) throw new Error('Unable to load cart');
-    return response.json();
+  const response = await fetch(`${routes.cart}.js`, {
+    headers: {
+      Accept: 'application/json'
+    }
+  });
+
+  if (!response.ok) {
+    throw new Error('Unable to load cart');
   }
+
+  return response.json();
+}
 
   function renderCartItems(cart) {
     cartItems.replaceChildren();
@@ -288,29 +378,42 @@ renderCart();
   }
 
   async function updateLine(key, quantity) {
-    try {
-      const response = await 	fetch($.js, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify({ id: key, quantity })
-      });
+  try {
+    const response = await fetch(`${routes.cartChange}.js`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Accept: 'application/json'
+      },
+      body: JSON.stringify({
+        id: key,
+        quantity
+      })
+    });
 
-      if (!response.ok) throw new Error('Cart update failed');
-
-      const cart = await response.json();
-      renderCartItems(cart);
-      cartCount.textContent = cart.item_count;
-      cartHeading.textContent = `CART / ${cart.item_count} ITEMS`;
-      subtotal.textContent = money(cart.total_price);
-
-      document.dispatchEvent(new CustomEvent('cart:updated', { detail: cart }));
-    } catch {
-      cartItems.prepend(
-        makeElement('p', 'uc-search-status', 'UPDATE FAILED. PLEASE TRY AGAIN.')
-      );
+    if (!response.ok) {
+      throw new Error('Cart update failed');
     }
+
+    const cart = await response.json();
+
+    renderCartItems(cart);
+
+    cartCount.textContent = cart.item_count;
+    cartHeading.textContent = `CART / ${cart.item_count} ITEMS`;
+    subtotal.textContent = money(cart.total_price);
+
+    document.dispatchEvent(
+      new CustomEvent('cart:updated', { detail: cart })
+    );
+  } catch {
+    cartItems.prepend(
+      makeElement(
+        'p',
+        'uc-search-status',
+        'UPDATE FAILED. PLEASE TRY AGAIN.'
+      )
+    );
   }
+}
 })();

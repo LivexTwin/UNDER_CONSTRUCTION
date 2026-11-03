@@ -142,10 +142,6 @@ button {
   text-transform: uppercase;
 }
 
-.header-nav a:hover,
-.header-utility:hover {
-  color: var(--color-accent);
-}
 
 .header-utility {
   display: flex;
