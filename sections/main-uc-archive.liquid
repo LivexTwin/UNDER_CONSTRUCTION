@@ -3,17 +3,17 @@
 %}
 
 <section class="uc-archive" aria-label="Product archive">
-      <div class="uc-archive__controls">
-    <button
-      class="uc-archive__toggle"
-      type="button"
-      data-archive-toggle
-      aria-label="Pause automatic scrolling"
-      aria-pressed="false"
-    >
-      PAUSE
-    </button>
-  </div>
+<div class="uc-archive__controls" hidden>
+  <button
+    class="uc-archive__toggle"
+    type="button"
+    data-archive-toggle
+    aria-label="Play automatic scrolling"
+    aria-pressed="false"
+  >
+    PLAY
+  </button>
+</div>
   <div
     class="uc-archive__viewport"
     data-archive-viewport
@@ -213,12 +213,14 @@
   }
 
 .uc-archive__viewport {
-  height: 600px;
-  overflow-y: auto;
-  overflow-x: hidden;
-  scrollbar-width: thin;
-  scrollbar-color: var(--uc-muted, #77776e) transparent;
-  overscroll-behavior: contain;
+  height: auto;
+  overflow: visible;
+  scrollbar-width: none;
+  overscroll-behavior: auto;
+}
+
+.uc-archive__controls[hidden] {
+  display: none;
 }
 
 .uc-archive__controls {
@@ -464,357 +466,484 @@
 
 
 {% javascript %}
-  (() => {
-    if (window.ucArchiveGalleryInitialized) return;
-    window.ucArchiveGalleryInitialized = true;
+ 
+(() => {
+  if (window.ucArchiveGalleryInitialized) return;
+  window.ucArchiveGalleryInitialized = true;
 
-    let activeGallery = null;
-    let activeImages = [];
-    let activeIndex = 0;
-    let previousFocus = null;
-    let previousBodyOverflow = '';
-    let galleryOpen = false;
+  let activeGallery = null;
+  let activeImages = [];
+  let activeIndex = 0;
+  let previousFocus = null;
+  let previousBodyOverflow = '';
+  let galleryOpen = false;
 
-    const getControls = (gallery) => ({
-      image: gallery.querySelector('[data-gallery-image]'),
-      caption: gallery.querySelector('[data-gallery-caption]'),
-      close: gallery.querySelector('[data-gallery-close]'),
-      previous: gallery.querySelector('[data-gallery-previous]'),
-      next: gallery.querySelector('[data-gallery-next]')
-    });
+  // Shared callback so closing the gallery can resume archive scrolling.
+  let resumeArchiveAnimation = () => {};
 
-const showImage = () => {
-  if (!activeGallery || !activeImages.length) return;
+  const getControls = (gallery) => ({
+    image: gallery.querySelector('[data-gallery-image]'),
+    caption: gallery.querySelector('[data-gallery-caption]'),
+    close: gallery.querySelector('[data-gallery-close]'),
+    previous: gallery.querySelector('[data-gallery-previous]'),
+    next: gallery.querySelector('[data-gallery-next]')
+  });
 
-  const controls = getControls(activeGallery);
-  controls.image.src = activeImages[activeIndex];
-  controls.caption.textContent =
-    `${activeGallery.dataset.productTitle || ''} — ${activeIndex + 1} / ${activeImages.length}`;
+  const showImage = () => {
+    if (!activeGallery || !activeImages.length) return;
 
-  const multipleImages = activeImages.length > 1;
-  controls.previous.disabled = !multipleImages;
-  controls.next.disabled = !multipleImages;
-};
+    const controls = getControls(activeGallery);
 
-    const closeGallery = () => {
-      if (!activeGallery) return;
+    controls.image.src = activeImages[activeIndex];
 
-      const gallery = activeGallery;
-      const controls = getControls(gallery);
+    controls.caption.textContent =
+      `${activeGallery.dataset.productTitle || ''} — ${activeIndex + 1} / ${activeImages.length}`;
 
-      gallery.hidden = true;
-      gallery.setAttribute('aria-hidden', 'true');
-      controls.image.removeAttribute('src');
+    const multipleImages = activeImages.length > 1;
 
-      document.body.style.overflow = previousBodyOverflow;
+    controls.previous.disabled = !multipleImages;
+    controls.next.disabled = !multipleImages;
+  };
 
-      activeGallery = null;
-      activeImages = [];
-      galleryOpen = false;
-      startAnimation();
+  const closeGallery = () => {
+    if (!activeGallery) return;
 
-      if (previousFocus && previousFocus.isConnected) {
-        previousFocus.focus();
-      }
+    const gallery = activeGallery;
+    const controls = getControls(gallery);
 
-      previousFocus = null;
-    };
+    gallery.hidden = true;
+    gallery.setAttribute('aria-hidden', 'true');
+    controls.image.removeAttribute('src');
 
-    const openGallery = (row) => {
-      const archive = row.closest('.uc-archive');
-      if (!archive) return;
+    document.body.style.overflow = previousBodyOverflow;
 
-      const gallery = archive.querySelector('[data-archive-gallery]');
-      if (!gallery) return;
+    activeGallery = null;
+    activeImages = [];
+    galleryOpen = false;
 
-      let images = [];
+    if (previousFocus && previousFocus.isConnected) {
+      previousFocus.focus();
+    }
 
-      try {
-        images = JSON.parse(row.getAttribute('data-gallery-images') || '[]');
-      } catch (error) {
-        console.error('Could not read archive gallery images:', error);
-      }
+    previousFocus = null;
 
-      if (!images.length) return;
+    resumeArchiveAnimation();
+  };
 
-      if (activeGallery) closeGallery();
+  const openGallery = (row) => {
+    const archive = row.closest('.uc-archive');
+    if (!archive) return;
 
-      activeGallery = gallery;
-      activeImages = images;
-      activeIndex = 0;
-      previousFocus = row;
-      galleryOpen = true;
-      previousBodyOverflow = document.body.style.overflow;
+    const gallery = archive.querySelector('[data-archive-gallery]');
+    if (!gallery) return;
 
-      gallery.dataset.productTitle =
-        row.dataset.productTitle ||
-        row.querySelector('.uc-archive__name')?.textContent.trim() ||
-        '';
+    let images = [];
 
-      gallery.hidden = false;
-      gallery.setAttribute('aria-hidden', 'false');
-      document.body.style.overflow = 'hidden';
+    try {
+      images = JSON.parse(
+        row.getAttribute('data-gallery-images') || '[]'
+      );
+    } catch (error) {
+      console.error('Could not read archive gallery images:', error);
+    }
 
-      showImage();
-      getControls(gallery).close.focus();
-    };
+    if (!images.length) return;
 
-    // Archive automatic scrolling
-    const setupArchiveScrolling = () => {
-      const archives = document.querySelectorAll('.uc-archive');
+    if (activeGallery) closeGallery();
 
-      archives.forEach((archive) => {
-        if (archive.dataset.scrollInitialized) return;
-        archive.dataset.scrollInitialized = 'true';
+    activeGallery = gallery;
+    activeImages = images;
+    activeIndex = 0;
+    previousFocus = row;
+    galleryOpen = true;
 
-        const viewport = archive.querySelector('[data-archive-viewport]');
-        const toggle = archive.querySelector('[data-archive-toggle]');
+    previousBodyOverflow = document.body.style.overflow;
 
-        if (!viewport || !toggle) return;
+    gallery.dataset.productTitle =
+      row.dataset.productTitle ||
+      row.querySelector('.uc-archive__name')?.textContent.trim() ||
+      '';
 
-        const reducedMotion = window.matchMedia(
-          '(prefers-reduced-motion: reduce)'
+    gallery.hidden = false;
+    gallery.setAttribute('aria-hidden', 'false');
+
+    document.body.style.overflow = 'hidden';
+
+    showImage();
+    getControls(gallery).close.focus();
+  };
+
+  // Document-level automatic scrolling.
+  const setupArchiveScrolling = () => {
+    const archives = document.querySelectorAll('.uc-archive');
+
+    archives.forEach((archive) => {
+      if (archive.dataset.scrollInitialized) return;
+
+      archive.dataset.scrollInitialized = 'true';
+
+      const viewport = archive.querySelector('[data-archive-viewport]');
+      const toggle = archive.querySelector('[data-archive-toggle]');
+      const controls = archive.querySelector('.uc-archive__controls');
+
+      if (!viewport || !toggle || !controls) return;
+
+      const reducedMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)'
+      );
+
+      const desktop = window.matchMedia('(min-width: 1024px)');
+
+      const pageScroller =
+        document.scrollingElement || document.documentElement;
+
+      let direction = 1;
+      let playing = false;
+      let hovering = false;
+      let focused = false;
+      let userPaused = false;
+      let frame = null;
+      let previousTime = 0;
+      let currentPosition = 0;
+
+      const speed = 25;
+
+      // Measure page overflow without allowing the controls
+      // themselves to create the overflow that makes them appear.
+      const canScroll = () => {
+        const wasHidden = controls.hidden;
+
+        controls.hidden = true;
+
+        const hasOverflow =
+          pageScroller.scrollHeight > window.innerHeight + 1;
+
+        controls.hidden = wasHidden;
+
+        return hasOverflow;
+      };
+
+      const updateButton = () => {
+        toggle.textContent = playing ? 'PAUSE' : 'PLAY';
+
+        toggle.setAttribute(
+          'aria-label',
+          playing
+            ? 'Pause automatic scrolling'
+            : 'Play automatic scrolling'
         );
 
-    const desktop = window.matchMedia('(min-width: 1024px)');
-    
-        let direction = 1;
-        let playing = false;
-        let hovering = false;
-        let focused = false;
-        let frame = null;
-        let previousTime = 0;
-        let currentPosition = 0;
+        toggle.setAttribute('aria-pressed', String(playing));
+      };
 
-        const speed = 25;
+      const updateVisibility = () => {
+        const hasOverflow = canScroll();
 
-        const canScroll = () =>
-          viewport.scrollHeight > viewport.clientHeight + 1;
+        controls.hidden = !hasOverflow;
 
-        const updateButton = () => {
-          toggle.textContent = playing ? 'PAUSE' : 'PLAY';
-          toggle.setAttribute(
-            'aria-label',
-            playing
-              ? 'Pause automatic scrolling'
-              : 'Play automatic scrolling'
-          );
-          toggle.setAttribute('aria-pressed', String(!playing));
-        };
+        return hasOverflow;
+      };
 
-        const stopAnimation = () => {
-          if (frame !== null) {
-            cancelAnimationFrame(frame);
-            frame = null;
-          }
+      const stopAnimation = () => {
+        if (frame !== null) {
+          cancelAnimationFrame(frame);
+          frame = null;
+        }
 
-          previousTime = 0;
-        };
+        previousTime = 0;
+      };
 
-        const animate = (time) => {
-          if (!playing) return;
+      const pauseAnimation = () => {
+        stopAnimation();
+      };
 
-          if (!previousTime) previousTime = time;
+      const animate = (time) => {
+        if (!playing) return;
 
-          const elapsed = Math.min((time - previousTime) / 1000, 0.05);
-          previousTime = time;
+        if (!previousTime) previousTime = time;
 
-          const maxScroll = viewport.scrollHeight - viewport.clientHeight;
+        const elapsed = Math.min(
+          (time - previousTime) / 1000,
+          0.05
+        );
 
-          if (maxScroll <= 0) {
-            stopAnimation();
-            return;
-          }
+        previousTime = time;
+
+        const maxScroll =
+          pageScroller.scrollHeight - window.innerHeight;
+
+        if (maxScroll <= 1) {
+          setPlaying(false);
+          updateVisibility();
+          return;
+        }
 
         currentPosition += direction * speed * elapsed;
 
-let nextPosition = currentPosition;
+        let nextPosition = currentPosition;
 
-          if (nextPosition >= maxScroll) {
-            nextPosition = maxScroll;
-            direction = -1;
-          } else if (nextPosition <= 0) {
-            nextPosition = 0;
-            direction = 1;
-          }
+        if (nextPosition >= maxScroll) {
+          nextPosition = maxScroll;
+          direction = -1;
+        } else if (nextPosition <= 0) {
+          nextPosition = 0;
+          direction = 1;
+        }
 
-          viewport.scrollTop = nextPosition;
-          frame = requestAnimationFrame(animate);
-          currentPosition = nextPosition;
-        };
+        window.scrollTo({
+          top: nextPosition,
+          behavior: 'instant'
+        });
 
-        const startAnimation = () => {
+        currentPosition = nextPosition;
+
+        frame = requestAnimationFrame(animate);
+      };
+
+      const startAnimation = () => {
         if (
-  !playing ||
-  !desktop.matches ||
-  reducedMotion.matches ||
-  hovering ||
-  focused ||
-    galleryOpen ||
-  document.hidden ||
-  !canScroll()
-) {
+          !playing ||
+          !desktop.matches ||
+          reducedMotion.matches ||
+          hovering ||
+          focused ||
+          galleryOpen ||
+          document.hidden ||
+          !updateVisibility()
+        ) {
+          return;
+        }
 
-  return;
-}
+        if (frame === null) {
+          previousTime = 0;
+          currentPosition = window.scrollY;
 
-          if (frame === null) {
-            previousTime = 0;
-            currentPosition = viewport.scrollTop;
-            frame = requestAnimationFrame(animate);
-          }
-        };
+          frame = requestAnimationFrame(animate);
+        }
+      };
 
-        const pauseAnimation = () => {
-          stopAnimation();
-        };
-
-        const setPlaying = (value) => {
-          playing = value;
-          updateButton();
-
-          if (playing) {
-            startAnimation();
-          } else {
-            pauseAnimation();
-          }
-        };
-
-        toggle.addEventListener('click', () => {
-          setPlaying(!playing);
-        });
-
-     viewport.addEventListener('pointerover', (event) => {
-  if (event.target.closest('[data-archive-item]')) {
-    hovering = true;
-    pauseAnimation();
-  }
-});
-
-viewport.addEventListener('pointerout', (event) => {
-  if (
-    event.target.closest('[data-archive-item]') &&
-    !event.relatedTarget?.closest('[data-archive-item]')
-  ) {
-    hovering = false;
-    startAnimation();
-  }
-});
-
-        viewport.addEventListener('focusin', () => {
-          focused = true;
-          pauseAnimation();
-        });
-
-        viewport.addEventListener('focusout', (event) => {
-          if (!viewport.contains(event.relatedTarget)) {
-            focused = false;
-            startAnimation();
-          }
-        });
-
-        desktop.addEventListener('change', () => {
-          if (!desktop.matches) {
-            setPlaying(false);
-          } else if (!reducedMotion.matches && canScroll()) {
-            setPlaying(true);
-          }
-        });
-
-        reducedMotion.addEventListener('change', () => {
-          if (reducedMotion.matches) {
-            setPlaying(false);
-          }
-        });
-
-        document.addEventListener('visibilitychange', () => {
-          if (document.hidden) {
-            pauseAnimation();
-          } else {
-            startAnimation();
-          }
-        });
+      const setPlaying = (value) => {
+        playing = value && updateVisibility();
 
         updateButton();
 
-        if (desktop.matches && !reducedMotion.matches && canScroll()) {
-          setPlaying(true);
+        if (playing) {
+          startAnimation();
         } else {
-          setPlaying(false);
+          pauseAnimation();
+        }
+      };
+  
+            let manualScrollTimer = null;
+
+      const handleManualScroll = () => {
+        pauseAnimation();
+
+        clearTimeout(manualScrollTimer);
+
+        manualScrollTimer = setTimeout(() => {
+          currentPosition = window.scrollY;
+          startAnimation();
+        }, 500);
+      };
+
+      window.addEventListener('wheel', handleManualScroll, {
+        passive: true
+      });
+
+      window.addEventListener('touchmove', handleManualScroll, {
+        passive: true
+      });
+
+      // Keep the shared gallery callback connected to this archive.
+      resumeArchiveAnimation = () => {
+        if (
+          !userPaused &&
+          desktop.matches &&
+          !reducedMotion.matches &&
+          canScroll()
+        ) {
+          setPlaying(true);
+        }
+      };
+
+      // Manual PLAY / PAUSE.
+      toggle.addEventListener('click', () => {
+        userPaused = playing;
+        setPlaying(!playing);
+      });
+
+      // Pause when the pointer enters an archive item.
+      viewport.addEventListener('pointerover', (event) => {
+        if (event.target.closest('[data-archive-item]')) {
+          hovering = true;
+          pauseAnimation();
         }
       });
-    };
 
-    setupArchiveScrolling();
-
-    document.addEventListener('click', (event) => {
-      const row = event.target.closest('[data-archive-item]');
-
-      if (row) {
-        openGallery(row);
-        return;
-      }
-
-      if (!activeGallery) return;
-
-      const controls = getControls(activeGallery);
-
-      if (event.target.closest('[data-gallery-close]')) {
-        closeGallery();
-      } else if (event.target.closest('[data-gallery-previous]')) {
-        activeIndex =
-          (activeIndex - 1 + activeImages.length) % activeImages.length;
-        showImage();
-      } else if (event.target.closest('[data-gallery-next]')) {
-        activeIndex = (activeIndex + 1) % activeImages.length;
-        showImage();
-      } else if (event.target === activeGallery) {
-        closeGallery();
-      }
-    });
-
-    document.addEventListener('keydown', (event) => {
-      if (!activeGallery) return;
-
-      if (event.key === 'Escape') {
-        event.preventDefault();
-        closeGallery();
-        return;
-      }
-
-      if (activeImages.length > 1 && event.key === 'ArrowLeft') {
-        event.preventDefault();
-        activeIndex =
-          (activeIndex - 1 + activeImages.length) % activeImages.length;
-        showImage();
-      }
-
-      if (activeImages.length > 1 && event.key === 'ArrowRight') {
-        event.preventDefault();
-        activeIndex = (activeIndex + 1) % activeImages.length;
-        showImage();
-      }
-
-      if (event.key === 'Tab') {
-        const focusable = Array.from(
-          activeGallery.querySelectorAll(
-            'button:not([hidden]):not(:disabled)'
-          )
-        );
-
-        const first = focusable[0];
-        const last = focusable[focusable.length - 1];
-
-        if (event.shiftKey && document.activeElement === first) {
-          event.preventDefault();
-          last.focus();
-        } else if (!event.shiftKey && document.activeElement === last) {
-          event.preventDefault();
-          first.focus();
+      viewport.addEventListener('pointerout', (event) => {
+        if (
+          event.target.closest('[data-archive-item]') &&
+          !event.relatedTarget?.closest('[data-archive-item]')
+        ) {
+          hovering = false;
+          startAnimation();
         }
+      });
+
+      // Pause while keyboard focus is inside the archive.
+      viewport.addEventListener('focusin', () => {
+        focused = true;
+        pauseAnimation();
+      });
+
+      viewport.addEventListener('focusout', (event) => {
+        if (!viewport.contains(event.relatedTarget)) {
+          focused = false;
+          startAnimation();
+        }
+      });
+
+      // Recalculate when the screen size changes.
+      const refreshScrollState = () => {
+        const hasOverflow = updateVisibility();
+
+        if (!hasOverflow) {
+          userPaused = false;
+          setPlaying(false);
+          return;
+        }
+
+        if (!desktop.matches || reducedMotion.matches) {
+          setPlaying(false);
+          return;
+        }
+
+        if (!userPaused && !playing) {
+          setPlaying(true);
+        } else if (playing) {
+          startAnimation();
+        }
+      };
+
+      desktop.addEventListener('change', refreshScrollState);
+
+      reducedMotion.addEventListener('change', () => {
+        if (reducedMotion.matches) {
+          setPlaying(false);
+        } else {
+          refreshScrollState();
+        }
+      });
+
+      window.addEventListener('resize', refreshScrollState);
+      window.addEventListener('load', refreshScrollState);
+
+      // Detect content and image dimensions changing.
+      if ('ResizeObserver' in window) {
+        const resizeObserver = new ResizeObserver(() => {
+          refreshScrollState();
+        });
+
+        resizeObserver.observe(document.documentElement);
+        resizeObserver.observe(archive);
       }
+
+      document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+          pauseAnimation();
+        } else {
+          startAnimation();
+        }
+      });
+
+      // Initial state.
+      refreshScrollState();
     });
-  })();
+  };
+
+  setupArchiveScrolling();
+
+  // Archive item and gallery interactions.
+  document.addEventListener('click', (event) => {
+    const row = event.target.closest('[data-archive-item]');
+
+    if (row) {
+      openGallery(row);
+      return;
+    }
+
+    if (!activeGallery) return;
+
+    if (event.target.closest('[data-gallery-close]')) {
+      closeGallery();
+    } else if (event.target.closest('[data-gallery-previous]')) {
+      activeIndex =
+        (activeIndex - 1 + activeImages.length) % activeImages.length;
+
+      showImage();
+    } else if (event.target.closest('[data-gallery-next]')) {
+      activeIndex =
+        (activeIndex + 1) % activeImages.length;
+
+      showImage();
+    } else if (event.target === activeGallery) {
+      closeGallery();
+    }
+  });
+
+  // Gallery keyboard navigation.
+  document.addEventListener('keydown', (event) => {
+    if (!activeGallery) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      closeGallery();
+      return;
+    }
+
+    if (activeImages.length > 1 && event.key === 'ArrowLeft') {
+      event.preventDefault();
+
+      activeIndex =
+        (activeIndex - 1 + activeImages.length) % activeImages.length;
+
+      showImage();
+    }
+
+    if (activeImages.length > 1 && event.key === 'ArrowRight') {
+      event.preventDefault();
+
+      activeIndex =
+        (activeIndex + 1) % activeImages.length;
+
+      showImage();
+    }
+
+    if (event.key === 'Tab') {
+      const focusable = Array.from(
+        activeGallery.querySelectorAll(
+          'button:not([hidden]):not(:disabled)'
+        )
+      );
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (
+        !event.shiftKey &&
+        document.activeElement === last
+      ) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
+  });
+})();
+
 {% endjavascript %}
 
 
