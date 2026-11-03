@@ -1,11 +1,14 @@
 /* UNDER CONSTRUCTION — GLOBAL HEADER */
+.shopify-section-group-header-group {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+}
 
 .site-header {
   position: relative;
-  z-index: 10;
   background: var(--uc-paper, #e9e6dd);
   color: var(--uc-ink, #252621);
-
 }
 
 .header-inner {
@@ -113,12 +116,6 @@
 .header-utility-button:hover,
 .header-utility-button[aria-expanded="true"] {
   color: var(--color-accent);
-}
-
-/* Panels are removed from normal document flow */
-.site-header {
-  position: relative;
-  z-index: 20;
 }
 
 .uc-search-panel,

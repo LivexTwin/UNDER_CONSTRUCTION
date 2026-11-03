@@ -121,20 +121,6 @@ button {
   color: var(--color-muted);
 }
 
-.site-header {
-  position: relative;
-  z-index: 10;
-  background: var(--color-background);
-}
-
-.header-inner {
-  display: flex;
-  min-height: 4.5rem;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-}
-
 .wordmark {
   flex-shrink: 0;
   font-size: 0.95rem;
