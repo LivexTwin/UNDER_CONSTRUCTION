@@ -3,80 +3,168 @@
  
 <aside class="collection-index" aria-label="Catalog index">
   <div class="collection-index-heading">
-   <h2>{{ section.settings.index_title | escape }}</h2>
+    <h2>{{ section.settings.index_title | escape }}</h2>
   </div>
 
-  {% for filter in collection.filters %}
-    <div class="collection-index-group">
-      <p class="collection-index-label">
-        {% case filter.type %}
-          {% when 'price_range' %}
-            PRICE
-          {% else %}
-            {{ filter.label | escape }}
-        {% endcase %}
-      </p>
+  <div class="collection-index-filters">
 
-      {% if filter.type == 'price_range' %}
-        <form class="collection-price-filter" method="get">
-          {% for active_filter in collection.filters %}
-            {% for value in active_filter.active_values %}
-              <input
-                type="hidden"
-                name="{{ value.param_name | escape }}"
-                value="{{ value.value | escape }}"
-              >
-            {% endfor %}
-          {% endfor %}
+    {% comment %} Find the filter with the most options {% endcomment %}
+    {% assign largest_filter_size = 0 %}
+    {% assign largest_filter_param = blank %}
 
-          <label for="Filter-{{ filter.param_name }}-GTE">MIN</label>
-          <input
-            id="Filter-{{ filter.param_name }}-GTE"
-            name="{{ filter.min_value.param_name }}"
-            type="number"
-            min="0"
-            placeholder="0"
-            {% if filter.min_value.value %}
-              value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
-            {% endif %}
-          >
+    {% for filter in collection.filters %}
+      {% assign filter_label = filter.label | downcase %}
 
-          <label for="Filter-{{ filter.param_name }}-LTE">MAX</label>
-          <input
-            id="Filter-{{ filter.param_name }}-LTE"
-            name="{{ filter.max_value.param_name }}"
-            type="number"
-            min="0"
-            placeholder="—"
-            {% if filter.max_value.value %}
-              value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
-            {% endif %}
-          >
+      {% assign supported_filter = false %}
 
-          <button type="submit">APPLY</button>
-        </form>
-      {% else %}
-        <ul class="collection-filter-values" role="list">
-          {% for value in filter.values %}
-            <li>
-              <a
-                href="{{ value.url_to_add | default: value.url_to_remove }}"
-                {% if value.active %}aria-current="true"{% endif %}
-              >
-                <span>{{ value.label | escape }}</span>
-                {% if value.active %}
-                  <span aria-hidden="true"> ×</span>
-                {% endif %}
-              </a>
-            </li>
-          {% endfor %}
-        </ul>
+      {% case filter_label %}
+        {% when 'category', 'product category', 'product type', 'type', 'vendor', 'brand', 'size' %}
+          {% assign supported_filter = true %}
+      {% endcase %}
+
+      {% if supported_filter and filter.values.size > largest_filter_size %}
+        {% assign largest_filter_size = filter.values.size %}
+        {% assign largest_filter_param = filter.param_name %}
       {% endif %}
+    {% endfor %}
+
+
+    {% comment %} CATEGORY, BRAND AND SIZE {% endcomment %}
+    {% for filter in collection.filters %}
+
+      {% assign filter_label = filter.label | downcase %}
+      {% assign filter_title = blank %}
+
+      {% case filter_label %}
+        {% when 'category', 'product category', 'product type', 'type' %}
+          {% assign filter_title = 'CATEGORY' %}
+
+        {% when 'vendor', 'brand' %}
+          {% assign filter_title = 'BRAND' %}
+
+        {% when 'size' %}
+          {% assign filter_title = 'SIZE' %}
+      {% endcase %}
+
+      {% if filter_title != blank %}
+        <details
+          class="collection-index-group"
+          {% if filter.param_name == largest_filter_param %}open{% endif %}
+        >
+          <summary class="collection-index-label">
+            <span>{{ filter_title }}</span>
+            <span class="collection-index-indicator" aria-hidden="true"></span>
+          </summary>
+
+          <div class="collection-index-content">
+            <ul class="collection-filter-values" role="list">
+              {% for value in filter.values %}
+                <li>
+                  <a
+                    href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+                    {% if value.active %}aria-current="true"{% endif %}
+                  >
+                    <span>
+  {% if filter_title == 'SIZE' and value.label contains '(' %}
+    {{ value.label | split: '(' | last | remove: ')' | strip | escape }}
+  {% else %}
+    {{ value.label | escape }}
+  {% endif %}
+</span>
+
+                    {% if value.active %}
+                      <span aria-hidden="true"> ×</span>
+                    {% endif %}
+                  </a>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </details>
+      {% endif %}
+
+    {% endfor %}
+
+
+    {% comment %} PRICE — ALWAYS VISIBLE {% endcomment %}
+    {% for filter in collection.filters %}
+  {% if filter.type == 'price_range' %}
+
+    <div class="collection-index-group collection-index-price">
+      <p class="collection-index-label">PRICE</p>
+
+      <form class="collection-price-filter" method="get">
+
+        {% comment %} Preserve other active filters {% endcomment %}
+        {% for active_filter in collection.filters %}
+          {% for value in active_filter.active_values %}
+            <input
+              type="hidden"
+              name="{{ value.param_name | escape }}"
+              value="{{ value.value | escape }}"
+            >
+          {% endfor %}
+        {% endfor %}
+
+        {% comment %} Preserve the current sort order {% endcomment %}
+        {% if collection.sort_by != blank %}
+          <input
+            type="hidden"
+            name="sort_by"
+            value="{{ collection.sort_by | escape }}"
+          >
+        {% endif %}
+
+        <label class="collection-price-filter__min-label"
+          for="Filter-{{ filter.param_name }}-GTE">
+          MIN
+        </label>
+
+        <input
+          class="collection-price-filter__min-input"
+          id="Filter-{{ filter.param_name }}-GTE"
+          name="{{ filter.min_value.param_name }}"
+          type="number"
+          min="0"
+          placeholder="0"
+          {% if filter.min_value.value %}
+            value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+          {% endif %}
+        >
+
+        <label class="collection-price-filter__max-label"
+          for="Filter-{{ filter.param_name }}-LTE">
+          MAX
+        </label>
+
+        <input
+          class="collection-price-filter__max-input"
+          id="Filter-{{ filter.param_name }}-LTE"
+          name="{{ filter.max_value.param_name }}"
+          type="number"
+          min="0"
+          placeholder="—"
+          {% if filter.max_value.value %}
+            value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+          {% endif %}
+        >
+
+        <button type="submit">APPLY</button>
+
+        {% if filter.min_value.value != nil or filter.max_value.value != nil %}
+          <a class="collection-price-reset" href="{{ filter.url_to_remove }}">
+            RESET ×
+          </a>
+        {% endif %}
+
+      </form>
     </div>
-  {% endfor %}
 
+  {% endif %}
+{% endfor %}
+
+  </div>
 </aside>
-
 
   <div class="collection-workspace">
 
@@ -114,26 +202,44 @@
     {% endif %}
 
     <header class="collection-toolbar">
-      <p class="collection-eyebrow">
-        {{ collection.title | escape }} /
-        {{ collection.products_count }} ITEMS
-      </p>
+  <p class="collection-eyebrow">
+    {{ collection.title | escape }} /
+    {{ collection.products_count }} ITEMS
+  </p>
 
-      <div class="collection-toolbar-controls">
-        <label for="CollectionSort">SORT</label>
-        <select id="CollectionSort" name="sort_by">
-          {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
-          {% for option in collection.sort_options %}
-            <option
-              value="{{ option.value | escape }}"
-              {% if option.value == sort_by %}selected{% endif %}
-            >
-              {{ option.name | escape }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-    </header>
+  {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
+
+  <fieldset class="collection-toolbar-controls">
+    <legend>SORT:</legend>
+
+    {% for option in collection.sort_options %}
+      {% case option.value %}
+        {% when 'manual' %}
+          {% assign sort_label = 'FEATURED' %}
+        {% when 'created-descending' %}
+          {% assign sort_label = 'NEWEST' %}
+        {% when 'price-ascending' %}
+          {% assign sort_label = 'PRICE ↑' %}
+        {% when 'price-descending' %}
+          {% assign sort_label = 'PRICE ↓' %}
+        {% else %}
+          {% assign sort_label = blank %}
+      {% endcase %}
+
+      {% if sort_label != blank %}
+        <label class="collection-sort-option">
+          <input
+            type="radio"
+            name="collection-sort"
+            value="{{ option.value | escape }}"
+            {% if option.value == sort_by %}checked{% endif %}
+          >
+          <span>{{ sort_label }}</span>
+        </label>
+      {% endif %}
+    {% endfor %}
+  </fieldset>
+</header>
 
     {% paginate collection.products by section.settings.products_per_page %}
       {% if collection.products.size > 0 %}
@@ -183,25 +289,51 @@
           {% endfor %}
         </div>
 
-        {% if paginate.pages > 1 %}
-          <nav class="collection-pagination" aria-label="Pagination">
-            {% if paginate.previous %}
-              <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
-            {% else %}
-              <span class="pagination-disabled">← PREVIOUS</span>
-            {% endif %}
+        {% if paginate.next %}
+  <div
+    class="collection-load-more"
+    data-collection-load-more
+    data-next-url="{{ paginate.next.url }}"
+  >
+    <button
+      type="button"
+      class="collection-load-more__button"
+      data-load-more-button
+    >
+      LOAD MORE PRODUCTS →
+    </button>
+  </div>
+{% endif %}
 
-            <span class="pagination-count">
-              PAGE {{ paginate.current_page }} / {{ paginate.pages }}
-            </span>
+<p
+  class="visually-hidden"
+  data-collection-status
+  role="status"
+  aria-live="polite"
+  aria-atomic="true"
+></p>
 
-            {% if paginate.next %}
-              <a href="{{ paginate.next.url }}">NEXT →</a>
-            {% else %}
-              <span class="pagination-disabled">NEXT →</span>
-            {% endif %}
-          </nav>
-        {% endif %}
+<noscript>
+  {% if paginate.pages > 1 %}
+    <nav class="collection-pagination" aria-label="Pagination">
+      {% if paginate.previous %}
+        <a href="{{ paginate.previous.url }}">← PREVIOUS</a>
+      {% else %}
+        <span class="pagination-disabled">← PREVIOUS</span>
+      {% endif %}
+
+      <span class="pagination-count">
+        PAGE {{ paginate.current_page }} / {{ paginate.pages }}
+      </span>
+
+      {% if paginate.next %}
+        <a href="{{ paginate.next.url }}">NEXT →</a>
+      {% else %}
+        <span class="pagination-disabled">NEXT →</span>
+      {% endif %}
+    </nav>
+  {% endif %}
+</noscript>
       {% else %}
         <div class="collection-empty">
           <p>NOTHING AVAILABLE IN THIS COLLECTION.</p>
@@ -214,18 +346,150 @@
 
 <script>
   (() => {
-    const sortSelect = document.querySelector('#CollectionSort');
-    if (!sortSelect) return;
+    /* COLLECTION SORT */
+    const sortOptions = document.querySelectorAll(
+      'input[name="collection-sort"]'
+    );
 
-    sortSelect.addEventListener('change', () => {
-      const url = new URL(window.location.href);
-      url.searchParams.set('sort_by', sortSelect.value);
-      url.searchParams.delete('page');
-      window.location.href = url.toString();
+    sortOptions.forEach((option) => {
+      option.addEventListener('change', () => {
+        if (!option.checked) return;
+
+        const url = new URL(window.location.href);
+
+        url.searchParams.set('sort_by', option.value);
+        url.searchParams.delete('page');
+
+        window.location.href = url.toString();
+      });
     });
+
+    /* COLLECTION INFINITE SCROLL */
+    const grid = document.querySelector('.collection-grid');
+    const loadMore = document.querySelector('[data-collection-load-more]');
+    const status = document.querySelector('[data-collection-status]');
+
+    if (!grid || !loadMore || !status) return;
+
+    const button = loadMore.querySelector('[data-load-more-button]');
+
+    if (!button) return;
+
+    let loading = false;
+    let failed = false;
+
+    const loadNextPage = async (manual = false) => {
+      if (loading || !loadMore.dataset.nextUrl) return;
+      if (failed && !manual) return;
+      if (loadMore.dataset.complete === 'true') return;
+
+      loading = true;
+      failed = false;
+
+      button.disabled = true;
+      button.textContent = 'LOADING...';
+      loadMore.removeAttribute('data-error');
+
+      grid.setAttribute('aria-busy', 'true');
+      status.textContent = 'Loading more products.';
+
+      try {
+        const response = await fetch(loadMore.dataset.nextUrl);
+
+        if (!response.ok) {
+          throw new Error('Unable to load products.');
+        }
+
+        const html = await response.text();
+        const documentParser = new DOMParser();
+        const nextDocument = documentParser.parseFromString(
+          html,
+          'text/html'
+        );
+
+        const nextGrid = nextDocument.querySelector('.collection-grid');
+
+        if (!nextGrid) {
+          throw new Error('Product grid not found.');
+        }
+
+        const products = Array.from(nextGrid.children);
+
+        if (!products.length) {
+          throw new Error('No products found.');
+        }
+
+        products.forEach((product) => {
+          grid.appendChild(document.importNode(product, true));
+        });
+
+        const nextLoadMore = nextDocument.querySelector(
+          '[data-collection-load-more]'
+        );
+
+        if (nextLoadMore?.dataset.nextUrl) {
+          loadMore.dataset.nextUrl = nextLoadMore.dataset.nextUrl;
+          button.textContent = 'LOAD MORE PRODUCTS →';
+          button.disabled = false;
+        } else {
+          loadMore.dataset.complete = 'true';
+          loadMore.removeAttribute('data-next-url');
+          button.textContent = 'ALL PRODUCTS LOADED';
+          button.setAttribute('aria-disabled', 'true');
+
+          observer?.disconnect();
+        }
+
+        status.textContent = `${products.length} more products loaded.`;
+
+      } catch (error) {
+        failed = true;
+
+        loadMore.dataset.error = 'true';
+        button.disabled = false;
+        button.textContent = 'TRY AGAIN →';
+
+        status.textContent =
+          'More products could not be loaded. Use the try again button.';
+
+        console.error(error);
+
+      } finally {
+        loading = false;
+        grid.setAttribute('aria-busy', 'false');
+
+        if (loadMore.dataset.complete !== 'true' && !failed) {
+          button.disabled = false;
+        }
+      }
+    };
+
+    /* Manual keyboard-accessible fallback */
+    button.addEventListener('click', () => {
+      loadNextPage(true);
+    });
+
+    /* Automatic loading */
+    let observer;
+
+    if ('IntersectionObserver' in window) {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            loadNextPage();
+          }
+        },
+        {
+          rootMargin: '100px 0px'
+        }
+      );
+
+      observer.observe(loadMore);
+    } else {
+      loadMore.dataset.manualOnly = 'true';
+    }
   })();
 </script>
-
 
   {% schema %}
   {

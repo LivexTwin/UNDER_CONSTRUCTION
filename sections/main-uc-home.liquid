@@ -180,7 +180,9 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   grid-template-rows: minmax(0, 1.15fr) minmax(0, 1fr);
 
-  height: calc(100svh - var(--uc-header-height, 100px) - 32px);
+  /* height: calc(100svh - var(--uc-header-height, 100px) - 32px); */
+    height: calc(100svh - var(--uc-header-height, 10px) - 3px);
+  height: 100svh;
   min-height: 480px;
   border: 1px solid var(--uc-home-rule);
 }

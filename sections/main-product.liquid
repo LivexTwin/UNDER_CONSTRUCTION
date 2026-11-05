@@ -29,50 +29,74 @@
     </div>
 
     <div class="product-details">
-      <p class="eyebrow">Available / Product detail</p>
+      {% assign primary_collection = current_product.metafields.custom.primary_collection.value %}
+      
+      {% if section.settings.show_product_context %}
+        {% if current_product.vendor != blank or primary_collection != blank %}
+          <p class="eyebrow product-context">
+            {{ current_product.vendor | escape }}
+            {% if primary_collection != blank %}
+              / {{ primary_collection.title | escape }}
+            {% endif %}
+          </p>
+        {% endif %}
+      {% endif %}
 
       <h1 class="product-title">{{ current_product.title | escape }}</h1>
 
       <p class="product-price">{{ current_product.selected_or_first_available_variant.price | money }}</p>
 
+
+      <div class="product-content">
       {% form 'product', current_product, id: 'ProductForm' %}
-        {% unless current_product.has_only_default_variant %}
-          <div class="product-option">
-            <label for="VariantSelect" class="eyebrow">Select option</label>
-            <select id="VariantSelect" name="id">
-              {% for variant in current_product.variants %}
-                <option
-                  value="{{ variant.id }}"
-                  {% if variant == current_product.selected_or_first_available_variant %}selected{% endif %}
-                  {% unless variant.available %}disabled{% endunless %}
-                >
-                  {{ variant.title | escape }}{% unless variant.available %} — Sold out{% endunless %}
-                </option>
-              {% endfor %}
-            </select>
+
+  {% unless current_product.has_only_default_variant %}
+    <fieldset class="product-variants">
+      <legend class="visually-hidden">Select product variant</legend>
+
+      <div class="product-variant-options">
+        {% for variant in current_product.variants %}
+          <div class="product-variant">
+            <input
+              class="product-variant-input"
+              type="radio"
+              id="Variant-{{ variant.id }}"
+              name="id"
+              value="{{ variant.id }}"
+              {% if variant == current_product.selected_or_first_available_variant %}checked{% endif %}
+              {% unless variant.available %}disabled{% endunless %}
+            >
+
+            <label
+              class="product-variant-label"
+              for="Variant-{{ variant.id }}"
+            >
+              {{ variant.title | escape }}
+            </label>
           </div>
-        {% else %}
-          <input
-            type="hidden"
-            name="id"
-            value="{{ current_product.selected_or_first_available_variant.id }}"
-          >
-        {% endunless %}
+        {% endfor %}
+      </div>
+    </fieldset>
+  {% else %}
+    <input
+      type="hidden"
+      name="id"
+      value="{{ current_product.selected_or_first_available_variant.id }}"
+    >
+  {% endunless %}
 
-        <div class="product-option">
-          <label for="Quantity" class="eyebrow">Quantity</label>
-          <input id="Quantity" type="number" name="quantity" min="1" value="1">
-        </div>
+  <input type="hidden" name="quantity" value="1">
 
-        <button
-          class="product-submit"
-          type="submit"
-          name="add"
-          {% unless current_product.available %}disabled{% endunless %}
-        >
-          {% if current_product.available %}Add to bag{% else %}Sold out{% endif %}
-        </button>
-      {% endform %}
+  <button
+    class="product-submit"
+    type="submit"
+    name="add"
+    {% unless current_product.available %}disabled{% endunless %}
+  >
+    {% if current_product.available %}Add to bag{% else %}Sold out{% endif %}
+  </button>
+
+{% endform %}
 
       {% if current_product.description != blank %}
         <div class="product-description">
@@ -82,12 +106,20 @@
 
       <p class="eyebrow muted">SKU / {{ current_product.selected_or_first_available_variant.sku | default: 'Not assigned' | escape }}</p>
     </div>
+    </div>
   </div>
 </section>
 
 {% schema %}
 {
   "name": "Main product",
-  "settings": []
+  "settings": [
+    {
+  "type": "checkbox",
+  "id": "show_product_context",
+  "label": "Show product context",
+  "default": true
+}
+  ]
 }
 {% endschema %}

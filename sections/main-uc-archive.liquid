@@ -35,50 +35,75 @@
         {% endfor %}
 
         {% if is_sold_out %}
-          <button
-            class="uc-archive__row"
-            type="button"
-            data-archive-item
-            data-product-title="{{ product.title | escape }}"
-            data-gallery-images='[
-              {% for image in product.images %}
-                "{{ image | image_url: width: 1600 }}"{% unless forloop.last %},{% endunless %}
-              {% endfor %}
-            ]'
-          >
-            <span class="uc-archive__image">
-              {% if product.featured_image %}
-                {{
-                  product.featured_image
-                  | image_url: width: 240
-                  | image_tag: loading: 'lazy', alt: ''
-                }}
-              {% endif %}
-            </span>
+  {% assign archive_size = product.metafields.custom.size.value %}
 
-         <span class="uc-archive__name">
-  {{ product.title | escape }}
-</span>
-
-<span class="uc-archive__collection">
-  {{ product.metafields.custom.archive_collection.value | escape }}
-</span>
-
-<span class="uc-archive__release-date">
-  {% if product.published_at != blank %}
-    {{ product.published_at | date: '%d.%m.%y' }}
+  {% if archive_size == blank %}
+    {% assign size_option = product.options_by_name['Size'] %}
+    {% if size_option != blank %}
+      {% assign archive_size = size_option.values | join: ', ' %}
+    {% endif %}
   {% endif %}
-</span>
 
-<span class="uc-archive__material">
-  {{ product.metafields.custom.material.value | escape }}
-</span>
-
-<span class="uc-archive__notes">
-  {{ product.metafields.custom.archive_notes.value | escape }}
-</span>
-          </button>
+  <button
+    class="uc-archive__row"
+    type="button"
+    data-archive-item
+    data-product-title="{{ product.title | escape }}"
+    data-gallery-images='[
+      {% for image in product.images %}
+        "{{ image | image_url: width: 1600 }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]'
+  >
+    <span class="uc-archive__identity">
+      <span class="uc-archive__image">
+        {% if product.featured_image %}
+          {{
+            product.featured_image
+            | image_url: width: 240
+            | image_tag: loading: 'lazy', alt: ''
+          }}
         {% endif %}
+      </span>
+
+      <span class="uc-archive__name">
+        {{ product.title | escape }}
+
+        {% if archive_size != blank %}
+          <span class="uc-archive__size">
+            {{ archive_size | escape }}
+          </span>
+        {% endif %}
+      </span>
+    </span>
+
+    <span class="uc-archive__metadata">
+      {% if product.metafields.custom.archive_collection.value != blank %}
+        <span class="uc-archive__collection">
+          {{ product.metafields.custom.archive_collection.value | escape }}
+        </span>
+      {% endif %}
+
+      {% if product.published_at != blank %}
+        <span class="uc-archive__release-date">
+          {{ product.published_at | date: '%d.%m.%y' }}
+        </span>
+      {% endif %}
+
+      {% if product.metafields.custom.material.value != blank %}
+        <span class="uc-archive__material">
+          {{ product.metafields.custom.material.value | escape }}
+        </span>
+      {% endif %}
+
+      {% if product.metafields.custom.archive_notes.value != blank %}
+        <span class="uc-archive__notes">
+  {{ product.metafields.custom.archive_notes.value | escape | newline_to_br }}
+</span>
+      {% endif %}
+    </span>
+  </button>
+{% endif %}
       {% endfor %}
     {% endpaginate %}
 
@@ -101,51 +126,62 @@
           ]
         {% endcapture %}
 
-        <button
-          class="uc-archive__row"
-          
-          type="button"
-          data-archive-item
-          data-manual-entry
-          data-gallery-images='{{ manual_gallery_images | strip }}'
-          {{ block.shopify_attributes }}
-        >
-          <span class="uc-archive__image">
-            {% if block.settings.image %}
-              {{
-                block.settings.image
-                | image_url: width: 240
-                | image_tag: loading: 'lazy', alt: ''
-              }}
-            {% endif %}
-          </span>
+<button
+  class="uc-archive__row"
+  type="button"
+  data-archive-item
+  data-manual-entry
+  data-gallery-images='{{ manual_gallery_images | strip }}'
+  {{ block.shopify_attributes }}
+>
+  <span class="uc-archive__identity">
+    <span class="uc-archive__image">
+      {% if block.settings.image %}
+        {{
+          block.settings.image
+          | image_url: width: 240
+          | image_tag: loading: 'lazy', alt: ''
+        }}
+      {% endif %}
+    </span>
 
-          <span class="uc-archive__name">
-            {{ block.settings.name | escape }}
+    <span class="uc-archive__name">
+      {{ block.settings.name | escape }}
 
-            {% if block.settings.size != blank %}
-              <span class="uc-archive__size">
-                {{ block.settings.size | escape }}
-              </span>
-            {% endif %}
-          </span>
+      {% if block.settings.size != blank %}
+        <span class="uc-archive__size">
+          {{ block.settings.size | escape }}
+        </span>
+      {% endif %}
+    </span>
+  </span>
 
-          <span class="uc-archive__collection">
-            {{ block.settings.collection | escape }}
-          </span>
+  <span class="uc-archive__metadata">
+    {% if block.settings.collection != blank %}
+      <span class="uc-archive__collection">
+        {{ block.settings.collection | escape }}
+      </span>
+    {% endif %}
 
-          <span class="uc-archive__release-date">
-            {{ block.settings.release_date | escape }}
-          </span>
+    {% if block.settings.release_date != blank %}
+      <span class="uc-archive__release-date">
+        {{ block.settings.release_date | escape }}
+      </span>
+    {% endif %}
 
-          <span class="uc-archive__material">
-            {{ block.settings.material | escape }}
-          </span>
+    {% if block.settings.material != blank %}
+      <span class="uc-archive__material">
+        {{ block.settings.material | escape }}
+      </span>
+    {% endif %}
 
-          <span class="uc-archive__notes">
-            {{ block.settings.notes | escape }}
-          </span>
-        </button>
+    {% if block.settings.notes != blank %}
+    <span class="uc-archive__notes">
+  {{ block.settings.notes | escape | newline_to_br }}
+</span>
+    {% endif %}
+  </span>
+</button>
 
       {% endif %}
     {% endfor %}
@@ -229,14 +265,21 @@
   margin-bottom: 8px;
 }
 
+.uc-archive__controls {
+  position: fixed;
+  right: 3rem;
+  z-index: 20;
+}
+
 .uc-archive__toggle {
-  padding: 4px 8px;
-  border: 1px solid var(--uc-archive-rule);
+  border:  none;
   background: transparent;
-  color: inherit;
+  color: var(--uc-muted);
   font: inherit;
   font-size: 10px;
+  min-width: 22px;
   cursor: pointer;
+  text-transform: uppercase;
 }
 
 .uc-archive__viewport {
@@ -258,7 +301,7 @@
 }
 
 .uc-archive__toggle:focus-visible {
-  outline: 2px solid var(--uc-accent, #3455db);
+  outline: 1px solid var(--uc-accent, #3455db);
   outline-offset: 3px;
 }
 
@@ -280,14 +323,13 @@
     width: 100%;
   }
 
+/* --- ARCHIVE ROW --- */
+
 .uc-archive__row {
-  display: grid;
-  grid-template-columns:
-    88px
-    minmax(180px, 1.5fr)
-    repeat(4, minmax(110px, 1fr));
-  align-items: start;
-  gap: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 24px;
   width: 100%;
   padding: 12px 8px;
   border: 0;
@@ -299,18 +341,19 @@
   cursor: pointer;
 }
 
-.uc-archive__release-date {
-  font-size: 13px;
+/* --- LEFT: IDENTITY --- */
+
+.uc-archive__identity {
+  display: flex;
+  align-items: flex-start;
+  flex: 0 1 40%;
+  min-width: 0;
+  gap: 12px;
 }
 
-  .uc-archive__row:focus-visible {
-    position: relative;
-    outline: 2px solid var(--uc-accent, #db7a34);
-    outline-offset: -2px;
-  }
-
- .uc-archive__image {
+.uc-archive__image {
   display: block;
+  flex: 0 0 88px;
   width: 88px;
   aspect-ratio: 1 / 1;
   overflow: hidden;
@@ -324,30 +367,55 @@
   object-fit: cover;
 }
 
-  .uc-archive__name {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 3px;
-    min-width: 0;
-    overflow-wrap: anywhere;
-    text-transform: uppercase;
-  }
+.uc-archive__name {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 0;
+  margin: 0;
+  text-align: left;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
 
-  .uc-archive__size {
-    display: block;
-    color: var(--uc-muted, #77776e);
-  }
+.uc-archive__size {
+  display: block;
+  color: var(--uc-muted, #77776e);
+  text-transform: none;
+}
+
+/* --- RIGHT: METADATA --- */
+
+/* --- RIGHT: METADATA --- */
+
+.uc-archive__metadata {
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  flex: 0 1 55%;
+  min-width: 0;
+  gap: 1rem;
+}
 
 .uc-archive__collection,
 .uc-archive__release-date,
 .uc-archive__material,
 .uc-archive__notes {
+  flex: 0 1 auto;
   min-width: 0;
+   max-width: 100%;
+  margin: 0;
+
   color: var(--uc-muted, #77776e);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  text-align: left;
+  white-space: normal;
+  word-break: normal;
+  overflow-wrap: anywhere;
+}
+
+.uc-archive__release-date {
+  font-size: 13px;
 }
 
     .uc-archive__gallery[hidden] {
@@ -436,21 +504,28 @@
     }
   }
 
-  @media (max-width: 700px) {
-    .uc-archive__row {
-      grid-template-columns: 60px minmax(0, 1fr) 16px;
-      gap: 12px;
-      padding: 10px 6px;
-    }
-
-    .uc-archive__image {
-      width: 60px;
-    }
-
-    .uc-archive__details {
-      display: none;
-    }
+@media (max-width: 700px) {
+  .uc-archive__row {
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 10px 6px;
   }
+
+  .uc-archive__identity {
+    flex-basis: 100%;
+  }
+
+  .uc-archive__image {
+    flex-basis: 60px;
+    width: 60px;
+  }
+
+  .uc-archive__metadata {
+    flex-basis: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 
   @media (prefers-reduced-motion: reduce) {
     .uc-archive,
@@ -624,7 +699,7 @@
       };
 
       const updateButton = () => {
-        toggle.textContent = playing ? 'PAUSE' : 'PLAY';
+        toggle.textContent = playing ? 'pause' : 'resume';
 
         toggle.setAttribute(
           'aria-label',
@@ -772,6 +847,8 @@
         userPaused = playing;
         setPlaying(!playing);
       });
+
+      
 
       // Pause when the pointer enters an archive item.
       viewport.addEventListener('pointerover', (event) => {
@@ -1007,11 +1084,15 @@
           "id": "material",
           "label": "Material"
         },
-        {
-          "type": "text",
-          "id": "notes",
-          "label": "Additional notes"
-        }
+ {
+  "type": "paragraph",
+  "content": "Keep notes concise. Use line breaks to control how the text appears in the archive."
+},
+{
+  "type": "textarea",
+  "id": "notes",
+  "label": "Additional notes"
+}
       ]
     }
   ],
