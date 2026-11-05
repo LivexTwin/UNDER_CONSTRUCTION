@@ -103,7 +103,54 @@
       {% endif %}
     </span>
   </button>
+
+  <button
+    class="uc-archive__mobile-card"
+    type="button"
+    data-archive-item
+    data-product-title="{{ product.title | escape }}"
+    data-gallery-images='[
+      {% for image in product.images %}
+        "{{ image | image_url: width: 1600 }}"{% unless forloop.last %},{% endunless %}
+      {% endfor %}
+    ]'
+  >
+    <span class="uc-archive__mobile-image">
+      {% if product.featured_image %}
+        {{
+          product.featured_image
+          | image_url: width: 800
+          | image_tag: loading: 'lazy', alt: ''
+        }}
+      {% endif %}
+    </span>
+
+    <span class="uc-archive__mobile-name">
+      {{ product.title | escape }}
+    </span>
+
+    <span class="uc-archive__mobile-date">
+      {% if product.published_at != blank %}
+        {{ product.published_at | date: '%d.%m.%y' }}
+      {% else %}
+        UNDATED
+      {% endif %}
+    </span>
+
+    {% if product.metafields.custom.archive_collection.value != blank %}
+  <span class="uc-archive__mobile-detail">
+    {{ product.metafields.custom.archive_collection.value | escape }}
+  </span>
+{% elsif product.metafields.custom.material.value != blank %}
+  <span class="uc-archive__mobile-detail">
+    {{ product.metafields.custom.material.value | escape }}
+  </span>
 {% endif %}
+  </button>
+
+{% endif %}
+
+
       {% endfor %}
     {% endpaginate %}
 
@@ -132,7 +179,6 @@
   data-archive-item
   data-manual-entry
   data-gallery-images='{{ manual_gallery_images | strip }}'
-  {{ block.shopify_attributes }}
 >
   <span class="uc-archive__identity">
     <span class="uc-archive__image">
@@ -182,6 +228,51 @@
     {% endif %}
   </span>
 </button>
+
+
+<button
+  class="uc-archive__mobile-card"
+  type="button"
+  data-archive-item
+  data-manual-entry
+  data-gallery-images='{{ manual_gallery_images | strip }}'
+  {{ block.shopify_attributes }}
+>
+  <span class="uc-archive__mobile-image">
+    {% if block.settings.image %}
+      {{
+        block.settings.image
+        | image_url: width: 800
+        | image_tag: loading: 'lazy', alt: ''
+      }}
+    {% endif %}
+  </span>
+
+  <span class="uc-archive__mobile-name">
+    {{ block.settings.name | escape }}
+  </span>
+
+  <span class="uc-archive__mobile-date">
+    {% if block.settings.release_date != blank %}
+      {{ block.settings.release_date | escape }}
+    {% else %}
+      UNDATED
+    {% endif %}
+  </span>
+
+  {% if block.settings.collection != blank %}
+    <span class="uc-archive__mobile-collection">
+      {{ block.settings.collection | escape }}
+    </span>
+  {% endif %}
+
+  {% if block.settings.material != blank %}
+    <span class="uc-archive__mobile-material">
+      {{ block.settings.material | escape }}
+    </span>
+  {% endif %}
+</button>
+
 
       {% endif %}
     {% endfor %}
@@ -243,6 +334,11 @@
 </section>
 
 {% stylesheet %}
+/* =========================================
+   ARCHIVE — BASE
+   Shared container, viewport and controls
+========================================= */
+
   .uc-archive,
   .uc-archive * {
     box-sizing: border-box;
@@ -305,15 +401,20 @@
   outline-offset: 3px;
 }
 
+/* =========================================
+   ARCHIVE — ROW SYSTEM
+   Desktop archive entry layout
+========================================= */
+
   .uc-archive {
     --uc-archive-rule: var(--uc-rule, rgba(179, 218, 23, 0.24));
 
     width: 100%;
-    max-width: 1200px;
+    max-width: 1000px;
     margin-inline: auto;
     color: var(--uc-ink, #252621);
     font-family: var(--font-mono);
-    font-size: 11px;
+    font-size: 13px;
     line-height: 1.5;
   }
 
@@ -323,6 +424,7 @@
     width: 100%;
   }
 
+/* --- IDENTITY: IMAGE / NAME / SIZE --- */
 /* --- ARCHIVE ROW --- */
 
 .uc-archive__row {
@@ -341,20 +443,32 @@
   cursor: pointer;
 }
 
-/* --- LEFT: IDENTITY --- */
+.uc-archive__mobile-card {
+  display: none;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+/* --- METADATA: COLLECTION / DATE / MATERIAL / NOTES --- */
 
 .uc-archive__identity {
   display: flex;
   align-items: flex-start;
   flex: 0 1 40%;
   min-width: 0;
-  gap: 12px;
+  gap: 10px;
 }
 
 .uc-archive__image {
   display: block;
-  flex: 0 0 88px;
-  width: 88px;
+  flex: 0 0 120px;
+  width: 120px;
   aspect-ratio: 1 / 1;
   overflow: hidden;
   background: var(--uc-paper, #f5f4f0);
@@ -387,15 +501,17 @@
 
 /* --- RIGHT: METADATA --- */
 
-/* --- RIGHT: METADATA --- */
-
 .uc-archive__metadata {
   display: flex;
   justify-content: flex-end;
   align-items: flex-start;
   flex: 0 1 55%;
   min-width: 0;
-  gap: 1rem;
+  gap: 2.5rem;
+}
+
+.uc-archive__metadata > *:last-child {
+  margin-left: -1.25rem; /* Push the last child to the left */
 }
 
 .uc-archive__collection,
@@ -415,7 +531,8 @@
 }
 
 .uc-archive__release-date {
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: 600;
 }
 
     .uc-archive__gallery[hidden] {
@@ -504,28 +621,100 @@
     }
   }
 
+/* =========================================
+   ARCHIVE — MOBILE
+   700px and below
+   Two-column cards / no autoplay / grayscale
+========================================= */
+
 @media (max-width: 700px) {
+  /* Hide desktop rows and use card grid */
   .uc-archive__row {
-    flex-wrap: wrap;
-    gap: 12px;
-    padding: 10px 6px;
+    display: none;
   }
 
-  .uc-archive__identity {
-    flex-basis: 100%;
-  }
-
-  .uc-archive__image {
-    flex-basis: 60px;
-    width: 60px;
-  }
-
-  .uc-archive__metadata {
-    flex-basis: 100%;
+  .uc-archive__list {
+    display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 12px;
+    row-gap: 24px;
+    padding: 0 12px 24px;
+  }
+
+  /* Mobile card structure */
+  .uc-archive__mobile-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
+    width: 100%;
+    min-width: 0;
+    padding: 0 0 12px;
+  }
+
+  /* Card image */
+  .uc-archive__mobile-image {
+    display: block;
+    width: 100%;
+    aspect-ratio: 3 / 4;
+    overflow: hidden;
+    background: var(--uc-paper, #f5f4f0);
+  }
+
+  .uc-archive__mobile-image img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(100%);
+    transition: filter 250ms ease;
+  }
+
+  /* Card typography */
+  .uc-archive__mobile-name {
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+  }
+
+  .uc-archive__mobile-date,
+  .uc-archive__mobile-detail {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    line-height: 1.4;
+    color: var(--uc-muted, #777);
+  }
+
+  /* No autoplay controls on touch layouts */
+  .uc-archive__controls {
+    display: none !important;
   }
 }
 
+
+/* =========================================
+   ARCHIVE — TABLET
+   701px–1100px
+   Single-row layout / no autoplay / grayscale
+========================================= */
+
+@media (min-width: 701px) and (max-width: 1100px) {
+  .uc-archive__controls {
+    display: none ;
+  }
+
+  .uc-archive__row:hover .uc-archive__image img,
+  .uc-archive__row:focus-visible .uc-archive__image img {
+    filter: grayscale(100%);
+  }
+}
+
+
+/* =========================================
+   ARCHIVE — ACCESSIBILITY
+   Respect reduced-motion preferences
+========================================= */
 
   @media (prefers-reduced-motion: reduce) {
     .uc-archive,
@@ -634,10 +823,12 @@
 
     previousBodyOverflow = document.body.style.overflow;
 
-    gallery.dataset.productTitle =
-      row.dataset.productTitle ||
-      row.querySelector('.uc-archive__name')?.textContent.trim() ||
-      '';
+   gallery.dataset.productTitle =
+  row.dataset.productTitle ||
+  row.querySelector(
+    '.uc-archive__name, .uc-archive__mobile-name'
+  )?.textContent.trim() ||
+  '';
 
     gallery.hidden = false;
     gallery.setAttribute('aria-hidden', 'false');
@@ -667,7 +858,7 @@
         '(prefers-reduced-motion: reduce)'
       );
 
-      const desktop = window.matchMedia('(min-width: 1024px)');
+      const desktop = window.matchMedia('(min-width: 1101px)');
 
       const pageScroller =
         document.scrollingElement || document.documentElement;
