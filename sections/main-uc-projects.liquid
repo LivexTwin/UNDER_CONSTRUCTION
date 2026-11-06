@@ -40,6 +40,23 @@
         </header>
         <div class="uc-projects__list" data-project-list aria-label="Projects">
        {% for block in section.blocks %}
+  {% assign metadata_lines = block.settings.metadata | newline_to_br | split: '<br />' %}
+
+  {%- comment -%} DESKTOP PROJECT ROW {%- endcomment -%}
+
+ {% if block.settings.destination != blank %}
+  <a
+    class="uc-projects__item"
+    href="{{ block.settings.destination }}"
+    data-project-item
+    data-project-name="{{ block.settings.name | escape }}"
+    data-project-description="{{ block.settings.description | escape }}"
+    data-project-image="{% if block.settings.image != blank %}{{ block.settings.image | image_url: width: 2000 }}{% endif %}"
+    data-project-image-srcset="{% if block.settings.image != blank %}{{ block.settings.image | image_url: width: 600 }} 600w, {{ block.settings.image | image_url: width: 900 }} 900w, {{ block.settings.image | image_url: width: 1200 }} 1200w, {{ block.settings.image | image_url: width: 1600 }} 1600w, {{ block.settings.image | image_url: width: 2000 }} 2000w{% endif %}"
+    data-project-alt="{{ block.settings.image_alt | escape }}"
+    {{ block.shopify_attributes }}
+  >
+{% else %}
   <button
     class="uc-projects__item"
     type="button"
@@ -52,24 +69,82 @@
     aria-pressed="{% if forloop.first %}true{% else %}false{% endif %}"
     {{ block.shopify_attributes }}
   >
+{% endif %}
     <span class="uc-projects__name">
       {{ block.settings.name | escape }}
     </span>
 
-<span class="uc-projects__metadata-list">
-  {% assign metadata_lines = block.settings.metadata | newline_to_br | split: '<br />' %}
+    <span class="uc-projects__metadata-list">
+      {% for line in metadata_lines limit: 3 %}
+        {% assign metadata_value = line | strip %}
+        {% if metadata_value != blank %}
+          <span class="uc-projects__metadata">
+            {{ metadata_value | escape }}
+          </span>
+        {% endif %}
+      {% endfor %}
+    </span>
 
-  {% for line in metadata_lines limit: 4 %}
-    {% assign metadata_value = line | strip %}
-    {% if metadata_value != blank %}
-      <span class="uc-projects__metadata">
-        {{ metadata_value | escape }}
+    <span class="uc-projects__status">
+      {{ block.settings.status | escape }}
+    </span>
+ {% if block.settings.destination != blank %}
+  </a>
+{% else %}
+  </button>
+{% endif %}
+
+{%- comment -%} MOBILE PROJECT CARD {%- endcomment -%}
+
+{% if block.settings.destination != blank %}
+  <a
+    class="uc-projects__mobile-card"
+    href="{{ block.settings.destination }}"
+  >
+{% else %}
+  <div class="uc-projects__mobile-card">
+{% endif %}
+
+    
+    {% if block.settings.image != blank %}
+  <div class="uc-projects__mobile-image">
+    {{
+      block.settings.image
+      | image_url: width: 1200
+      | image_tag:
+        widths: '400, 600, 900, 1200',
+        sizes: '(max-width: 749px) 100vw, 0px',
+        loading: 'lazy',
+        alt: block.settings.image_alt
+    }}
+  </div>
+{% endif %}
+
+    <div class="uc-projects__mobile-heading">
+      <span class="uc-projects__mobile-name">
+        {{ block.settings.name | escape }}
       </span>
-    {% endif %}
-  {% endfor %}
-</span> 
-</button>
-          {% endfor %}
+
+      <span class="uc-projects__mobile-status">
+        {{ block.settings.status | escape }}
+      </span>
+    </div>
+
+    <div class="uc-projects__mobile-metadata">
+      {% for line in metadata_lines limit: 3 %}
+        {% assign metadata_value = line | strip %}
+        {% if metadata_value != blank %}
+          <span>{{ metadata_value | escape }}</span>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+{% if block.settings.destination != blank %}
+  </a>
+{% else %}
+  </div>
+{% endif %}
+{% endfor %}
         </div>
       </div>
 
@@ -90,7 +165,7 @@
     grid-template-columns: minmax(0, 1.75fr) minmax(0, 3fr);
     gap: 0;
     align-items: start;
-    padding: 24px 20px;
+    padding: 0 24px 20px;
   }
 
   /* Left column: selected project */
@@ -101,7 +176,7 @@
     min-width: 0;
     padding-right: 24px;
     position: sticky; 
-    top: var(--uc-header-height, 80px);
+    top: var(--uc-header-height, 55px);
     align-self: start;
 
   }
@@ -199,7 +274,7 @@
   .uc-projects__item {
     position: relative;
     display: grid;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr) auto;
     align-items: center;
     gap: 1rem;
     width: 100%;
@@ -223,6 +298,8 @@
     border-bottom: 1px solid var(--uc-line);
   }
 
+  
+
   .uc-projects__item:hover,
   .uc-projects__item[aria-pressed="true"] {
     background-color: color-mix(
@@ -236,6 +313,12 @@
     outline: 1px solid var(--color-foreground);
     outline-offset: -2px;
   }
+
+  /* Mobile cards are hidden on desktop */
+
+.uc-projects__mobile-card {
+  display: none;
+}
 
   /* Project name */
 
@@ -251,6 +334,25 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
+
+  .uc-projects__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  min-width: 0;
+  width: 100%;
+}
+
+
+
+.uc-projects__status {
+  white-space: nowrap;
+  color: var(--uc-muted);
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  text-align: right;
+}
 
   /* Project metadata */
 
@@ -282,31 +384,174 @@
     }
   }
 
-  /* Mobile */
-
-  @media screen and (max-width: 749px) {
-    .uc-projects__layout {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 2rem;
-      padding: 20px 16px;
-    }
-
-    .uc-projects__left {
-      gap: 2rem;
-      padding-right: 0;
-    }
-
-    .uc-projects__item {
-      grid-template-columns: minmax(0, 1fr);
-      gap: 0.4rem;
-      padding: 0.5rem 0;
-    }
-
-    .uc-projects__metadata-list {
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 0.25rem 0.75rem;
-    }
+  /* PROJECTS — MOBILE */
+@media screen and (max-width: 749px) {
+  .uc-projects__layout {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 20px 16px;
   }
+
+  .uc-projects__left {
+    gap: 2rem;
+    padding-right: 0;
+  }
+
+  .uc-projects__item {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.4rem;
+    padding: 0.75rem 0;
+  }
+
+.uc-projects__metadata-list {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.25rem 0.75rem;
+}
+
+
+  /* Hide desktop rows and show mobile cards */
+
+  .uc-projects__item {
+    display: none;
+  }
+
+  .uc-projects__mobile-card {
+  display: block;
+  width: 100%;
+  padding-bottom: 0.75rem;
+}
+
+  .uc-projects__mobile-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+  }
+
+  .uc-projects__mobile-name {
+    min-width: 0;
+    font-size: 0.65rem;
+  }
+
+  .uc-projects__mobile-status {
+    flex-shrink: 0;
+    color: var(--color-muted);
+    font-size: 0.65rem;
+    white-space: nowrap;
+  }
+
+  .uc-projects__mobile-metadata {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin-top: 0.4rem;
+    color: var(--color-muted);
+    font-size: 0.65rem;
+  }
+
+  /* Mobile intro ordering */
+
+.uc-projects__layout {
+  display: flex;
+  flex-direction: column;
+}
+
+.uc-projects__left {
+  display: none;
+}
+
+.uc-projects__index {
+  display: contents;
+}
+
+.uc-projects__header {
+  order: -1;
+  width: 100%;
+}
+
+.uc-projects__header p { 
+  margin: 2rem 0 1rem;
+}
+
+.uc-projects__list {
+  order: 0;
+  width: 100%;
+}
+
+
+.uc-projects__mobile-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  margin-bottom: 0.75rem;
+  overflow: hidden;
+}
+
+.uc-projects__mobile-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+}
+
+/* TABLET PROJECTS */
+@media screen and (min-width: 750px) and (max-width: 1100px) {
+
+  /* Hide desktop preview and index rows */
+  .uc-projects__left,
+  .uc-projects__item {
+    display: none;
+  }
+
+  /* Use the mobile card presentation */
+  .uc-projects__layout {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 20px 16px;
+  }
+
+  .uc-projects__index {
+    display: contents;
+  }
+
+  .uc-projects__header {
+    order: -1;
+    width: 100%;
+    margin-bottom: 2rem;
+  }
+
+  .uc-projects__list {
+    order: 0;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+    row-gap: 2rem;
+    width: 100%;
+  }
+
+  .uc-projects__mobile-card {
+    display: block;
+    width: 100%;
+    padding: 0;
+  }
+
+  .uc-projects__mobile-image {
+  width: 100%;
+  aspect-ratio: 3/ 4;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.uc-projects__mobile-image img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+}
 {% endstylesheet %}
 
 {% javascript %}
@@ -384,6 +629,12 @@
           "label": "Project name",
           "default": "Project name"
         },
+            {
+          "type": "text",
+          "id": "status",
+          "label": "Project status",
+          "default": "IN DEVELOPMENT"
+        },
         {
           "type": "image_picker",
           "id": "image",
@@ -399,12 +650,19 @@
           "id": "description",
           "label": "Project description"
         },
-{
-  "type": "textarea",
-  "id": "metadata",
-  "label": "Project metadata",
-  "info": "Enter up to four short descriptors, one per line. Examples: CATEGORY, YEAR, LOCATION, STATUS."
-}
+    
+        {
+          "type": "textarea",
+          "id": "metadata",
+          "label": "Project metadata",
+          "info": "Enter up to three short descriptors, one per line. Examples: CATEGORY, YEAR, LOCATION."
+        },
+        {
+          "type": "url",
+          "id": "destination",
+          "label": "Project destination",
+          "info": "Optional. Link this project to a product, collection, or page."
+        }
       ]
     }
   ],
