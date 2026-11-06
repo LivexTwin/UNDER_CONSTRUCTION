@@ -13,7 +13,6 @@
 .search-eyebrow,
 .search-results-header,
 .search-result-type {
-  font-family: var(--font-mono);
   font-size: 0.7rem;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -60,7 +59,6 @@
   border: 0;
   background: transparent;
   color: var(--color-foreground);
-  font-family: var(--font-mono);
   font-size: 0.75rem;
   cursor: pointer;
 }
@@ -109,7 +107,6 @@
   height: 100%;
   min-height: 10rem;
   place-items: center;
-  font-family: var(--font-mono);
   font-size: 0.7rem;
 }
 
@@ -125,7 +122,7 @@
 .search-result-title {
   margin: 0;
   font-size: 0.9rem;
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
   line-height: 1.4;
 }
 
@@ -146,10 +143,6 @@
   line-height: 1.5;
 }
 
-.search-result-price {
-  font-family: var(--font-mono);
-}
-
 .search-result-excerpt {
   color: var(--color-muted);
 }
@@ -162,7 +155,6 @@
   margin-top: 4rem;
   padding-top: 1rem;
   border-top: 1px solid var(--color-line);
-  font-family: var(--font-mono);
   font-size: 0.7rem;
 }
 
@@ -192,7 +184,6 @@
   display: inline-block;
   margin-top: 1rem;
   color: inherit;
-  font-family: var(--font-mono);
   font-size: 0.75rem;
 }
 

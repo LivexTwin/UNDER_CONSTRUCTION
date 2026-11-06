@@ -49,7 +49,6 @@
   display: flex;
   align-items: center;
   gap: 20px;
-  font-family: "Courier New", monospace;
   font-size: 10px;
   letter-spacing: 0.04em;
   white-space: nowrap;
@@ -215,7 +214,6 @@
   border-bottom: 1px solid var(--uc-rule, #c8c7c0);
 
   color: var(--uc-accent, #3455db);
-  font-family: var(--font-mono);
   font-size: 10px;
   text-decoration: none;
 }
@@ -280,7 +278,6 @@
 .uc-cart-variant,
 .uc-cart-note {
   color: var(--color-muted);
-  font-family: var(--font-mono);
   font-size: 10px;
 }
 
@@ -295,7 +292,6 @@
   border-bottom: 1px solid var(--uc-rule, #c8c7c0);
 
   color: var(--uc-accent, #3455db);
-  font-family: var(--font-mono);
   font-size: 10px;
   text-decoration: none;
 }
@@ -321,7 +317,6 @@
 .uc-panel-heading {
   padding-bottom: 12px;
   border-bottom: 1px dashed var(--uc-rule);
-  font-family: var(--font-mono);
   font-size: 10px;
 }
 
@@ -358,7 +353,6 @@
 }
 
 .uc-cart-item-price {
-  font-family: var(--font-mono);
   font-size: 10px;
 }
 
@@ -388,7 +382,6 @@
 }
 
 .uc-cart-subtotal {
-  font-family: var(--font-mono);
   font-size: 11px;
 }
 
@@ -408,7 +401,6 @@
   border-radius: 0;
   background: transparent;
   color: var(--uc-ink);
-  font-family: "Courier New", monospace;
   font-size: inherit;
   padding: 2.4px;
   box-shadow: none;

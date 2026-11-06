@@ -34,7 +34,6 @@
   background: var(--uc-paper);
   color: var(--uc-ink);
 
-  font-family: "Courier New", monospace;
   font-size: 11px;
   line-height: 1.45;
 }
@@ -61,7 +60,7 @@
   margin: 0;
   font: inherit;
   font-size: 19px;
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
   letter-spacing: -0.07em;
 }
 
@@ -210,7 +209,6 @@
 
 .collection-eyebrow,
 .collection-toolbar-controls {
-  font-family: "Courier New", monospace;
   font-size: 10px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -248,7 +246,6 @@
   border-color: var(--uc-rule);
   background: transparent;
   color: var(--uc-ink);
-  font-family: "Courier New", monospace;
 }
 
 .collection-price-filter input:focus,
@@ -345,7 +342,7 @@
 
 .uc-collection-hero-caption h2 {
   font-size: 13px;
-  font-weight: 500;
+  font-weight: var(--font-weight-emphasis);
 }
 
 .uc-collection-hero-caption p {
@@ -393,7 +390,7 @@
   place-items: center;
   padding: 16px;
 
-  font: 10px "Courier New", monospace;
+  font-size: 10px;
   text-align: center;
 }
 
@@ -406,7 +403,7 @@
 .collection-card-reference {
   margin: 0;
   color: var(--uc-muted);
-  font: 9px "Courier New", monospace;
+  font-size: 9px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
@@ -414,7 +411,7 @@
 .collection-card-title {
   margin: 0;
   font-size: 13px;
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
   line-height: 1.4;
 }
 
@@ -429,7 +426,7 @@
 
 .collection-card-price {
   margin: 0;
-  font: 11px "Courier New", monospace;
+  font-size: 11px;
 }
 
 /* =========================================

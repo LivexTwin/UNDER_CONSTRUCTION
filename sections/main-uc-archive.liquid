@@ -413,7 +413,6 @@
     max-width: 1000px;
     margin-inline: auto;
     color: var(--uc-ink, #252621);
-    font-family: var(--font-mono);
     font-size: 13px;
     line-height: 1.5;
   }
@@ -532,7 +531,7 @@
 
 .uc-archive__release-date {
   font-size: 14px;
-  font-weight: 600;
+  font-weight: var(--font-weight-emphasis);
 }
 
     .uc-archive__gallery[hidden] {
@@ -674,13 +673,12 @@
   .uc-archive__mobile-name {
     font-size: 12px;
     line-height: 1.3;
-    font-weight: 600;
+    font-weight: var(--font-weight-emphasis);
     overflow-wrap: anywhere;
   }
 
   .uc-archive__mobile-date,
   .uc-archive__mobile-detail {
-    font-family: var(--font-mono);
     font-size: 10px;
     line-height: 1.4;
     color: var(--uc-muted, #777);

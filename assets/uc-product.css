@@ -4,7 +4,6 @@
   grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
   gap: clamp(1rem, 2vw, 2rem);
   align-items: start;
-  font-family: var(--font-mono);
 }
 
 /* Product gallery */
@@ -41,13 +40,12 @@
   font-size: clamp(1.75rem, 2.5vw, 2.5rem);
   line-height: 1.05;
   letter-spacing: -0.045em;
-  font-weight: 500;
+  font-weight: var(--font-weight-emphasis);
   text-transform: none;
 }
 
 .product-price {
   margin-block: 1rem;
-  font-family: var(--font-mono);
   font-size: 24px;
 }
 
@@ -105,7 +103,6 @@
   align-items: center;
   justify-content: center;
  
-  font-family: var(--font-mono);
   font-size: 16px;
   cursor: pointer;
 

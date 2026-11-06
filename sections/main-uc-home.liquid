@@ -211,7 +211,7 @@
   height: 100%;
   place-items: center;
   background: var(--uc-paper, #f5f4f0);
-  font: 11px/1.5 "Courier New", monospace;
+  font: 11px/1.5;
 }
 
 /* Lower panels */
@@ -268,10 +268,9 @@
 .uc-home__feature-title,
 .uc-home__description {
   margin: 0 0 8px;
-  font-family: "Courier New", monospace;
   font-size: 11px;
   line-height: 1.5;
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
 }
 
 .uc-home__eyebrow,
@@ -297,7 +296,7 @@
   display: inline-block;
   margin-top: 8px;
   color: var(--uc-accent, #3455db);
-  font: 11px/1.5 "Courier New", monospace;
+  font: 11px/1.5;
   text-decoration: none;
 }
 
@@ -315,9 +314,7 @@
 .uc-home__description {
   min-width: 0;
   color: var(--uc-muted, #77776e);
-  font-family: "Courier New", monospace;
   font-size: 11px;
-  font-weight: 400;
   line-height: 1.5;
   text-transform: none;
 }
@@ -333,7 +330,7 @@
 
 .uc-home__description strong {
   color: var(--uc-ink, #252621);
-  font-weight: 700;
+  font-weight: var(--font-weight-emphasis);
 }
 
 .uc-home__description em {
@@ -447,7 +444,7 @@
 .uc-home__release-row td {
   padding: 9px 8px;
   font-size: 11px;
-  font-weight: 400;
+  font-weight: var(--font-weight-base);
   line-height: 1.5;
   vertical-align: middle;
   overflow-wrap: anywhere;
@@ -512,7 +509,7 @@
   border-top: 1px solid var(--uc-home-rule);
 
   color: var(--uc-accent, #3455db);
-  font: 11px/1.5 "Courier New", monospace;
+  font: 11px/1.5;
   text-decoration: none;
   text-transform: uppercase;
 }

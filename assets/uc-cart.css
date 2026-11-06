@@ -40,7 +40,7 @@
 .cart-item-details h2 {
   margin: 0 0 0.5rem;
   font-size: 1rem;
-  font-weight: 600;
+  font-weight: var(--font-weight-emphasis);
 }
 
 .cart-quantity {
@@ -77,8 +77,7 @@
 }
 
 .cart-summary strong {
-  font-family: var(--font-mono);
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
 }
 
 .cart-actions {

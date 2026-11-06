@@ -1,4 +1,68 @@
+/* =========================================
+   BASICALLY A MONO
+========================================= */
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-Thin.woff2") format("woff2");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-ExtraLight.woff2") format("woff2");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-SemiBold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Basically A Mono";
+  src: url("BasicallyAMono-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+
+
 :root {
+
+
   color-scheme: light;
   --color-background: #f5f4f0;
   --color-foreground: #111111;
@@ -12,8 +76,12 @@
   --uc-rule: rgba(37, 38, 33, 0.24);
   --uc-accent: #3455db;
 
-  --font-body: Arial, Helvetica, sans-serif;
-  --font-mono: "Courier New", Courier, monospace;
+  --font-body: "Basically A Mono", monospace;
+  --font-mono: "Basically A Mono", monospace;
+  
+  --font-weight-base: 200;
+  --font-weight-emphasis: 300;
+
 
   --page-width: 1600px;
   --page-gutter: clamp(1rem, 3vw, 3rem);
@@ -39,6 +107,7 @@ body {
   color: var(--color-foreground);
   font-family: var(--font-body);
   font-size: 15px;
+  font-weight: var(--font-weight-base);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
 }
@@ -124,7 +193,7 @@ button {
 .wordmark {
   flex-shrink: 0;
   font-size: 0.95rem;
-  font-weight: 800;
+  font-weight: 500;
   letter-spacing: -0.055em;
   text-transform: uppercase;
 }

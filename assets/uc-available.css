@@ -20,7 +20,7 @@
 .uc-section-title {
   margin: 0;
   font-size: clamp(3.5rem, 9vw, 9rem);
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
   line-height: 0.95;
   letter-spacing: -0.09em;
 }

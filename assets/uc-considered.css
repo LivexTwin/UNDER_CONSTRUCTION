@@ -112,7 +112,7 @@
   z-index: 4;
   color: #fff;
   font-size: 9px;
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
   line-height: 1.5;
   letter-spacing: 0.06em;
   text-shadow: 0 1px 5px rgb(0 0 0 / 35%);
@@ -183,7 +183,7 @@
   margin: 0 0 26px;
   font-size: 10px;
   line-height: 1.6;
-  font-weight: 400;
+  font-weight: var(--font-weight-emphasis);
   letter-spacing: 0.12em;
 }
 
@@ -191,7 +191,7 @@
   margin: 0;
   font-family: Arial, Helvetica, sans-serif;
   font-size: clamp(44px, 5.6vw, 88px);
-  font-weight: 400;
+  font-weight: var(--font-weight-base);
   line-height: 1.05;
   letter-spacing: -0.075em;
   white-space: nowrap;
@@ -202,7 +202,7 @@
   margin: 32px 0 0;
   color: var(--uc-muted);
   font-size: 11px;
-  font-weight: 400;
+  font-weight: var(--font-weight-base);
   line-height: 1.8;
   letter-spacing: 0.005em;
 }
