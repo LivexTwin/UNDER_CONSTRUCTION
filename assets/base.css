@@ -58,6 +58,33 @@
   font-display: swap;
 }
 
+/* 1. Define the Regular Weight */
+@font-face {
+  font-family: 'Void Mono';
+  src: url('VoidMono-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* 2. Define the Medium Weight */
+@font-face {
+  font-family: 'Void Mono';
+  src: url('VoidMono-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* Force standard character layout */
+body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
+
+  
+  /* THIS DISABLES ALL LIGATURES AND HIDDEN ALTERNATES COMPLETELY */
+  font-variant-ligatures: none !important;
+  font-feature-settings: "liga" 0, "clig" 0, "calt" 0, "ss01" 0, "ss02" 0 !important;
+}
+
 
 
 :root {
@@ -76,8 +103,8 @@
   --uc-rule: rgba(37, 38, 33, 0.24);
   --uc-accent: #3455db;
 
-  --font-body: "Basically A Mono", monospace;
-  --font-mono: "Basically A Mono", monospace;
+  --font-body: "Void Mono", monospace;
+  --font-mono: "Void Mono", monospace;
   
   --font-weight-base: 200;
   --font-weight-emphasis: 300;

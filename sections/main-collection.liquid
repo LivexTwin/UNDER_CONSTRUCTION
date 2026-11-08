@@ -1,13 +1,66 @@
 
 <section class="collection-page">
  
-<aside class="collection-index" aria-label="Catalog index">
+<div class="collection-sidebar">
   <div class="collection-index-heading">
     <h2>{{ section.settings.index_title | escape }}</h2>
   </div>
 
-  <div class="collection-index-filters">
+  <aside class="collection-index" aria-label="Catalog index">
+  <div
+    class="collection-filter-overlay"
+    id="collection-filter-overlay"
+    role="dialog"
+    aria-modal="true"
+    aria-label="Filter and sort products"
+  >
+    <div class="collection-filter-overlay__header">
+      <span>FILTER / SORT</span>
 
+      <button
+        type="button"
+        class="collection-filter-overlay__close"
+        data-filter-close
+        aria-label="Close filters"
+      >
+        CLOSE 
+      </button>
+    </div>
+
+    <form
+  class="collection-filter-form"
+  id="collection-filter-form"
+  method="get"
+  action="{{ collection.url }}"
+>
+
+{% for filter in collection.filters %}
+  {% assign filter_label = filter.label | downcase %}
+  {% assign supported_filter = false %}
+
+  {% case filter_label %}
+    {% when 'category', 'product category', 'product type', 'type', 'vendor', 'brand', 'size' %}
+      {% assign supported_filter = true %}
+  {% endcase %}
+
+  {% unless supported_filter or filter.type == 'price_range' %}
+    {% for value in filter.active_values %}
+      <input
+        type="hidden"
+        name="{{ value.param_name | escape }}"
+        value="{{ value.value | escape }}"
+        data-preserved-filter
+      >
+    {% endfor %}
+  {% endunless %}
+{% endfor %}
+
+  <div class="collection-filter-overlay__content">
+
+      {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
+
+
+      <div class="collection-index-filters">
     {% comment %} Find the filter with the most options {% endcomment %}
     {% assign largest_filter_size = 0 %}
     {% assign largest_filter_param = blank %}
@@ -29,6 +82,19 @@
     {% endfor %}
 
 
+    {% assign has_active_supported_filter = false %}
+
+{% for filter in collection.filters %}
+  {% assign filter_label = filter.label | downcase %}
+
+  {% case filter_label %}
+    {% when 'category', 'product category', 'product type', 'type', 'vendor', 'brand', 'size' %}
+      {% if filter.active_values.size > 0 %}
+        {% assign has_active_supported_filter = true %}
+      {% endif %}
+  {% endcase %}
+{% endfor %}
+
     {% comment %} CATEGORY, BRAND AND SIZE {% endcomment %}
     {% for filter in collection.filters %}
 
@@ -47,10 +113,18 @@
       {% endcase %}
 
       {% if filter_title != blank %}
-        <details
-          class="collection-index-group"
-          {% if filter.param_name == largest_filter_param %}open{% endif %}
-        >
+       {% assign open_filter_group = false %}
+
+{% if filter.active_values.size > 0 %}
+  {% assign open_filter_group = true %}
+{% elsif has_active_supported_filter == false and filter.param_name == largest_filter_param %}
+  {% assign open_filter_group = true %}
+{% endif %}
+
+<details
+  class="collection-index-group"
+  {% if open_filter_group %}open{% endif %}
+>
           <summary class="collection-index-label">
             <span>{{ filter_title }}</span>
             <span class="collection-index-indicator" aria-hidden="true"></span>
@@ -59,24 +133,46 @@
           <div class="collection-index-content">
             <ul class="collection-filter-values" role="list">
               {% for value in filter.values %}
-                <li>
-                  <a
-                    href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
-                    {% if value.active %}aria-current="true"{% endif %}
-                  >
-                    <span>
-  {% if filter_title == 'SIZE' and value.label contains '(' %}
-    {{ value.label | split: '(' | last | remove: ')' | strip | escape }}
-  {% else %}
-    {{ value.label | escape }}
-  {% endif %}
-</span>
+             <li>
+  <div class="collection-filter-option-desktop">
+    <a
+      href="{% if value.active %}{{ value.url_to_remove }}{% else %}{{ value.url_to_add }}{% endif %}"
+      {% if value.active %}aria-current="true"{% endif %}
+    >
+      <span>
+        {% if filter_title == 'SIZE' and value.label contains '(' %}
+          {{ value.label | split: '(' | last | remove: ')' | strip | escape }}
+        {% else %}
+          {{ value.label | escape }}
+        {% endif %}
+      </span>
 
-                    {% if value.active %}
-                      <span aria-hidden="true"> ×</span>
-                    {% endif %}
-                  </a>
-                </li>
+      {% if value.active %}
+        <span aria-hidden="true"> ×</span>
+      {% endif %}
+    </a>
+  </div>
+
+  <div class="collection-filter-option-mobile">
+    <label class="collection-filter-option">
+      <input
+        type="checkbox"
+        name="{{ value.param_name | escape }}"
+        value="{{ value.value | escape }}"
+        {% if value.active %}checked{% endif %}
+        {% if value.count == 0 and value.active == false %}disabled{% endif %}
+      >
+
+      <span>
+        {% if filter_title == 'SIZE' and value.label contains '(' %}
+          {{ value.label | split: '(' | last | remove: ')' | strip | escape }}
+        {% else %}
+          {{ value.label | escape }}
+        {% endif %}
+      </span>
+    </label>
+  </div>
+</li>
               {% endfor %}
             </ul>
           </div>
@@ -93,28 +189,7 @@
     <div class="collection-index-group collection-index-price">
       <p class="collection-index-label">PRICE</p>
 
-      <form class="collection-price-filter" method="get">
-
-        {% comment %} Preserve other active filters {% endcomment %}
-        {% for active_filter in collection.filters %}
-          {% for value in active_filter.active_values %}
-            <input
-              type="hidden"
-              name="{{ value.param_name | escape }}"
-              value="{{ value.value | escape }}"
-            >
-          {% endfor %}
-        {% endfor %}
-
-        {% comment %} Preserve the current sort order {% endcomment %}
-        {% if collection.sort_by != blank %}
-          <input
-            type="hidden"
-            name="sort_by"
-            value="{{ collection.sort_by | escape }}"
-          >
-        {% endif %}
-
+    
         <label class="collection-price-filter__min-label"
           for="Filter-{{ filter.param_name }}-GTE">
           MIN
@@ -148,25 +223,98 @@
             value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
           {% endif %}
         >
+        {% assign price_filter_active = false %}
 
-        <button type="submit">APPLY</button>
+{% if filter.min_value.value != nil or filter.max_value.value != nil %}
+  {% assign price_filter_active = true %}
+{% endif %}
 
-        {% if filter.min_value.value != nil or filter.max_value.value != nil %}
-          <a class="collection-price-reset" href="{{ filter.url_to_remove }}">
-            RESET ×
-          </a>
-        {% endif %}
+<button
+  type="submit"
+  class="collection-price-apply"
+  {% if price_filter_active %}hidden{% endif %}
+>
+  APPLY
+</button>
 
-      </form>
+<button
+  type="button"
+  class="collection-price-reset"
+  data-price-reset
+  data-price-min-param="{{ filter.min_value.param_name }}"
+  data-price-max-param="{{ filter.max_value.param_name }}"
+  {% unless price_filter_active %}hidden{% endunless %}
+>
+  RESET
+</button>
     </div>
 
   {% endif %}
 {% endfor %}
 
-  </div>
-</aside>
+            </div>
+             <details class="collection-index-group collection-sort-accordion">
+  <summary class="collection-index-label">
+    <span>SORT</span>
+    <span class="collection-index-indicator" aria-hidden="true"></span>
+  </summary>
 
-  <div class="collection-workspace">
+  <div class="collection-index-content">
+    <fieldset class="collection-toolbar-controls collection-sort-mobile">
+
+    {% for option in collection.sort_options %}
+      {% case option.value %}
+        {% when 'manual' %}
+          {% assign sort_label = 'FEATURED' %}
+        {% when 'created-descending' %}
+          {% assign sort_label = 'NEWEST' %}
+        {% when 'price-ascending' %}
+          {% assign sort_label = 'PRICE ↑' %}
+        {% when 'price-descending' %}
+          {% assign sort_label = 'PRICE ↓' %}
+        {% else %}
+          {% assign sort_label = blank %}
+      {% endcase %}
+
+      {% if sort_label != blank %}
+        <label class="collection-sort-option">
+          <input
+            type="radio"
+            name="sort_by"
+            value="{{ option.value | escape }}"
+            {% if option.value == sort_by %}checked{% endif %}
+          >
+          <span>{{ sort_label }}</span>
+        </label>
+      {% endif %}
+    {% endfor %}
+      </fieldset>
+  </div>
+</details>
+    </div>
+
+    <div class="collection-filter-overlay__footer">
+        <button
+          type="button"
+          data-filter-clear
+        >
+          CLEAR ALL
+        </button>
+
+        <button
+          type="submit"
+          data-filter-apply
+        >
+          APPLY →
+        </button>
+      </div>
+        </form>
+    </div>
+    
+  </aside>
+</div>
+
+<div class="collection-workspace">
 
     {% if section.settings.hero_image != blank %}
       <section class="uc-collection-hero" aria-label="Featured content">
@@ -202,44 +350,55 @@
     {% endif %}
 
     <header class="collection-toolbar">
-  <p class="collection-eyebrow">
-    {{ collection.title | escape }} /
-    {{ collection.products_count }} ITEMS
-  </p>
+ <p class="collection-eyebrow">
+  PRODUCTS / {{ collection.products_count }} ITEMS
+</p>
 
-  {% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
 
-  <fieldset class="collection-toolbar-controls">
-    <legend>SORT:</legend>
+{% assign sort_by = collection.sort_by | default: collection.default_sort_by %}
 
-    {% for option in collection.sort_options %}
-      {% case option.value %}
-        {% when 'manual' %}
-          {% assign sort_label = 'FEATURED' %}
-        {% when 'created-descending' %}
-          {% assign sort_label = 'NEWEST' %}
-        {% when 'price-ascending' %}
-          {% assign sort_label = 'PRICE ↑' %}
-        {% when 'price-descending' %}
-          {% assign sort_label = 'PRICE ↓' %}
-        {% else %}
-          {% assign sort_label = blank %}
-      {% endcase %}
+<fieldset class="collection-toolbar-controls collection-sort-desktop">
+  <legend>SORT:</legend>
 
-      {% if sort_label != blank %}
-        <label class="collection-sort-option">
-          <input
-            type="radio"
-            name="collection-sort"
-            value="{{ option.value | escape }}"
-            {% if option.value == sort_by %}checked{% endif %}
-          >
-          <span>{{ sort_label }}</span>
-        </label>
-      {% endif %}
-    {% endfor %}
-  </fieldset>
+  {% for option in collection.sort_options %}
+    {% case option.value %}
+      {% when 'manual' %}
+        {% assign sort_label = 'FEATURED' %}
+      {% when 'created-descending' %}
+        {% assign sort_label = 'NEWEST' %}
+      {% when 'price-ascending' %}
+        {% assign sort_label = 'PRICE ↑' %}
+      {% when 'price-descending' %}
+        {% assign sort_label = 'PRICE ↓' %}
+      {% else %}
+        {% assign sort_label = blank %}
+    {% endcase %}
+
+    {% if sort_label != blank %}
+      <label class="collection-sort-option">
+        <input
+          type="radio"
+          name="collection-sort"
+          value="{{ option.value | escape }}"
+          {% if option.value == sort_by %}checked{% endif %}
+        >
+        <span>{{ sort_label }}</span>
+      </label>
+    {% endif %}
+  {% endfor %}
+</fieldset>
+  
 </header>
+
+<button
+  type="button"
+  class="collection-filter-trigger"
+  aria-haspopup="dialog"
+  aria-expanded="false"
+  aria-controls="collection-filter-overlay"
+>
+  FILTER <span>+</span>
+</button>
 
     {% paginate collection.products by section.settings.products_per_page %}
       {% if collection.products.size > 0 %}
@@ -347,22 +506,144 @@
 <script>
   (() => {
     /* COLLECTION SORT */
-    const sortOptions = document.querySelectorAll(
-      'input[name="collection-sort"]'
+
+    /* COLLECTION FILTER OVERLAY */
+const filterTrigger = document.querySelector('.collection-filter-trigger');
+const filterOverlay = document.querySelector('#collection-filter-overlay');
+const filterClose = document.querySelector('[data-filter-close]');
+const filterForm = document.querySelector('#collection-filter-form');
+const filterClear = document.querySelector('[data-filter-clear]');
+const priceReset = document.querySelector('[data-price-reset]');
+const mobileSort = document.querySelector('.collection-sort-mobile');
+
+mobileSort?.querySelectorAll('input[type="radio"]').forEach((radio) => {
+  radio.addEventListener('click', () => {
+    if (radio.dataset.wasChecked === 'true') {
+      radio.checked = false;
+      radio.dataset.wasChecked = 'false';
+    } else {
+      mobileSort.querySelectorAll('input[type="radio"]').forEach((input) => {
+        input.dataset.wasChecked = 'false';
+      });
+
+      radio.dataset.wasChecked = 'true';
+    }
+  });
+});
+
+filterForm?.addEventListener('submit', (event) => {
+  const isPriceApply = event.submitter?.matches(
+    '.collection-price-apply'
+  );
+
+  const isPriceInputSubmit = !event.submitter &&
+    document.activeElement?.matches(
+      '.collection-price-filter__min-input, .collection-price-filter__max-input'
     );
 
-    sortOptions.forEach((option) => {
-      option.addEventListener('change', () => {
-        if (!option.checked) return;
+  if (!isPriceApply && !isPriceInputSubmit) return;
 
-        const url = new URL(window.location.href);
+  const priceInputs = filterForm.querySelectorAll(
+    '.collection-price-filter__min-input, .collection-price-filter__max-input'
+  );
 
-        url.searchParams.set('sort_by', option.value);
-        url.searchParams.delete('page');
+  const hasPriceValue = [...priceInputs].some(
+    (input) => input.value.trim() !== ''
+  );
 
-        window.location.href = url.toString();
-      });
+  if (!hasPriceValue) {
+    event.preventDefault();
+  }
+});
+
+priceReset?.addEventListener('click', () => {
+  const url = new URL(window.location.href);
+
+  url.searchParams.delete(priceReset.dataset.priceMinParam);
+  url.searchParams.delete(priceReset.dataset.priceMaxParam);
+
+  url.searchParams.delete('page');
+
+  window.location.href = url.toString();
+});
+
+filterClear?.addEventListener('click', () => {
+  if (!filterForm) return;
+
+  filterForm.querySelectorAll('input[type="checkbox"]').forEach((input) => {
+    input.checked = false;
+  });
+
+  filterForm.querySelectorAll('input[type="radio"]').forEach((input) => {
+    input.checked = false;
+  });
+
+    filterForm.querySelectorAll('[data-preserved-filter]').forEach((input) => {
+    input.disabled = true;
+  });
+
+  filterForm.querySelectorAll('input[type="number"]').forEach((input) => {
+    input.value = '';
+  });
+});
+
+const mobileFilterGroups = filterOverlay?.querySelectorAll(
+  '.collection-index-group[open]'
+);
+
+const syncMobileFilterGroups = () => {
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    mobileFilterGroups?.forEach((group) => {
+      group.removeAttribute('open');
     });
+  }
+};
+
+syncMobileFilterGroups();
+
+const openFilters = () => {
+  if (!filterOverlay) return;
+
+  filterOverlay.classList.add('is-open');
+  filterTrigger?.setAttribute('aria-expanded', 'true');
+  document.body.style.overflow = 'hidden';
+  filterClose?.focus();
+};
+
+const closeFilters = () => {
+  if (!filterOverlay) return;
+
+  filterOverlay.classList.remove('is-open');
+  filterTrigger?.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+  filterTrigger?.focus();
+};
+
+filterTrigger?.addEventListener('click', openFilters);
+filterClose?.addEventListener('click', closeFilters);
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && filterOverlay?.classList.contains('is-open')) {
+    closeFilters();
+  }
+});
+
+   const desktopSortOptions = document.querySelectorAll(
+  '.collection-sort-desktop input[name="collection-sort"]'
+);
+
+desktopSortOptions.forEach((option) => {
+  option.addEventListener('change', () => {
+    if (!option.checked) return;
+
+    const url = new URL(window.location.href);
+
+    url.searchParams.set('sort_by', option.value);
+    url.searchParams.delete('page');
+
+    window.location.href = url.toString();
+  });
+});
 
     /* COLLECTION INFINITE SCROLL */
     const grid = document.querySelector('.collection-grid');
@@ -546,7 +827,8 @@
   "type": "url",
   "id": "hero_link",
   "label": "Hero link"
-}
+},
+
 
     ]
   }
