@@ -60,8 +60,8 @@
 
 /* 1. Define the Regular Weight */
 @font-face {
-  font-family: 'Void Mono';
-  src: url('VoidMono-Regular.woff2') format('woff2');
+  font-family: "Void Mono";
+  src: url("VoidMono-Regular.woff2") format("woff2");
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -69,27 +69,39 @@
 
 /* 2. Define the Medium Weight */
 @font-face {
-  font-family: 'Void Mono';
-  src: url('VoidMono-Medium.woff2') format('woff2');
+  font-family: "Void Mono";
+  src: url("VoidMono-Medium.woff2") format("woff2");
   font-weight: 500;
   font-style: normal;
   font-display: swap;
 }
 
 /* Force standard character layout */
-body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
-
-  
+body,
+button,
+input,
+select,
+textarea,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+a,
+span {
   /* THIS DISABLES ALL LIGATURES AND HIDDEN ALTERNATES COMPLETELY */
   font-variant-ligatures: none !important;
-  font-feature-settings: "liga" 0, "clig" 0, "calt" 0, "ss01" 0, "ss02" 0 !important;
+  font-feature-settings:
+    "liga" 0,
+    "clig" 0,
+    "calt" 0,
+    "ss01" 0,
+    "ss02" 0 !important;
 }
 
-
-
 :root {
-
-
   color-scheme: light;
   --color-background: #f5f4f0;
   --color-foreground: #111111;
@@ -105,10 +117,9 @@ body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, p, a, span {
 
   --font-body: "Void Mono", monospace;
   --font-mono: "Void Mono", monospace;
-  
+
   --font-weight-base: 200;
   --font-weight-emphasis: 300;
-
 
   --page-width: 1600px;
   --page-gutter: clamp(1rem, 3vw, 3rem);
@@ -133,7 +144,7 @@ body {
   background: var(--color-background);
   color: var(--color-foreground);
   font-family: var(--font-body);
-  font-size: 15px;
+  font-size: 13px;
   font-weight: var(--font-weight-base);
   line-height: 1.5;
   -webkit-font-smoothing: antialiased;
@@ -225,33 +236,10 @@ button {
   text-transform: uppercase;
 }
 
-.header-nav {
-  display: flex;
-  align-items: center;
-  gap: clamp(1rem, 2.5vw, 2.5rem);
-}
-
-.header-nav a,
-.header-utility {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  text-transform: uppercase;
-}
-
-.header-utility {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  white-space: nowrap;
-}
-
-
-
 .section-block {
   padding-block: var(--space-section);
   border-top: 1px solid var(--color-line);
 }
-
 
 .product-grid {
   display: grid;
@@ -360,20 +348,13 @@ button {
     gap: 0.75rem;
   }
 
-
   .product-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.5rem 0.65rem;
   }
-
-
 }
 
 @media (max-width: 420px) {
-  .header-nav a {
-    font-size: 0.62rem;
-  }
-
   .product-card-info {
     flex-direction: column;
     gap: 0.25rem;
@@ -394,13 +375,3 @@ button {
     transition-duration: 0.01ms !important;
   }
 }
-
-
-
-
-
-
-
-
-
-
